@@ -4,9 +4,8 @@ return {
 	build = ":TSUpdate",
 	config = function()
 		require("nvim-treesitter.configs").setup({
-			ensure_installed = { "lua", "rust", "c", "cpp", "toml" },
+			ensure_installed = { "lua", "rust", "c", "cpp", "toml", "zig" },
 			auto_install = true,
-			sync_install = false,
 			highlight = {
 				enable = true,
 				additional_vim_regex_highlighting = false,
