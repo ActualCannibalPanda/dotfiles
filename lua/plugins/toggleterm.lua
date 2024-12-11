@@ -3,6 +3,19 @@ return {
 	version = "*",
 	opts = {},
 	config = function()
+		if vim.uv.os_uname().sysname == "Windows_NT" then
+			if vim.fn.executable("powershell") then
+				vim.opt.shell = "powershell"
+			else
+				vim.opt.shell = "pwsh"
+			end
+			vim.opt.shellcmdflag =
+				"-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command [Console]::OutputEncoding=[System.Text.Encoding]::UTF8;"
+			vim.opt.shellredir = "RedirectStandardOutput %s -NoNewWindow -Wait"
+			vim.opt.shellpipe = "2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode"
+			vim.opt.shellquote = ""
+			vim.opt.shellxquote = ""
+		end
 		require("toggleterm").setup()
 		local Terminal = require("toggleterm.terminal").Terminal
 		local lazygit = Terminal:new({
