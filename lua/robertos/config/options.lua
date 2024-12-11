@@ -1,8 +1,19 @@
-vim.opt.number = true
-vim.opt.relativenumber = true
+local o = vim.opt
 
-vim.opt.shiftwidth = 2
-vim.opt.tabstop = 2
-vim.opt.softtabstop = 2
+-- line numbers
+o.signcolumn = 'auto:2'
+o.foldcolumn = 'auto:1'
+o.number = true
+o.relativenumber = true
 
-vim.opt.expandtab = true
+-- mouse
+o.mouse = 'a'
+o.mousescroll = 'ver:8,hor:6'
+o.mousemoveevent = true
+
+-- tabs
+o.tabstop = 2
+o.vartabstop = '2'
+o.shiftwidth = 0
+o.softtabstop = -1
+o.expandtab = true
