@@ -9,6 +9,7 @@ return {
       lua = { 'stylua' },
       rust = { 'rustfmt' },
       json = { 'prettier' },
+      cpp = { 'clang-format' },
     },
   },
 }

@@ -1,6 +1,6 @@
 return {
   'nvim-treesitter/nvim-treesitter',
-  dependencies = { 'HiPhish/nvim-ts-rainbow2' },
+  dependencies = { 'HiPhish/rainbow-delimiters.nvim' },
   build = ':TSUpdate',
   config = function()
     require('nvim-treesitter.configs').setup({
@@ -11,11 +11,7 @@ return {
         additional_vim_regex_highlighting = false,
       },
       indent = { enable = true },
-      rainbow = {
-        enable = true,
-        query = 'rainbow-parens',
-        strategy = require('ts-rainbow').strategy.global,
-      },
     })
+    require('rainbow-delimiters.setup').setup({})
   end,
 }
