@@ -20,6 +20,9 @@ return {
           vim.fn['vsnip#anonymous'](args.body) -- For `vsnip` users.
         end,
       },
+      completion = {
+        completeopt = 'menu,menuone,preview,noselect',
+      },
       window = {
         completion = cmp.config.window.bordered(),
         documentation = cmp.config.window.bordered(),
