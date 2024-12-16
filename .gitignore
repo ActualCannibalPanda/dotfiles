@@ -1,0 +1,87 @@
+#--------------------------------------------------#
+# The following was generated with gitignore.nvim: #
+#--------------------------------------------------#
+# Gitignore for the following technologies: Linux, Windows
+
+*~
+
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+# .nfs files are created when an open file is removed but is still being accessed
+.nfs*
+
+# Windows thumbnail cache files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+# Dump file
+*.stackdump
+
+# Folder config file
+[Dd]esktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+alire/
+aseprite/
+autostart/
+blender/
+Code/
+dconf/
+enchant/
+eog/
+evolution/
+fish/
+fury/
+glib-2.0/
+gnome-initial-setup-done
+gnome-session/
+GNOME-xdg-terminals.list
+goa-1.0/
+godot/
+Google/
+google-chrome/
+gtk-3.0/
+gtk-4.0/
+HammerAI/
+Harebrained Schemes/
+i3/
+ibus/
+JetBrains/
+Loop_Hero/
+menus/
+mimeapps.list
+nautilus/
+pulse/
+Sandbox Interactive GmbH/
+systemd/
+tiling-assistant/
+ubuntu-xdg-terminals.list
+unity3d/
+unityhub/
+update-notifier/
+user-dirs.dirs
+user-dirs.locale
+xdg-terminals.list
+.gsd-keyboard.settings-ported
+
