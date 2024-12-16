@@ -6,7 +6,7 @@ return {
     vim.keymap.set(
       'n',
       '<localleader>rr',
-      '<cmd>:TermExec cmd="odin run ." direction=float<cr>',
+      '<cmd>:TermExec cmd="odin run . -debug" direction=float<cr>',
       { desc = 'Run odin project' }
     )
   end,
