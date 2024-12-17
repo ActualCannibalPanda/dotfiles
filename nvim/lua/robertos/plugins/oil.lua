@@ -10,9 +10,9 @@ return {
   },
   keys = {
     {
-      '<leader>o',
+      '<localleader>o',
       function()
-        require('oil').open()
+        require('oil').toggle_float()
       end,
       desc = 'Open Oil',
       mode = { 'n' },
