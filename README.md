@@ -1,5 +1,4 @@
 # My Dotfiles 
-======================
 ### Install Linux
 `git clone https://github.com/CultistGameDev/nvim-config.git ~/.config`
 
