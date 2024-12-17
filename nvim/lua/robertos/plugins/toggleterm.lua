@@ -24,17 +24,11 @@ return {
       direction = 'float',
     })
 
-    function _lazygit_toggle()
+    local function _lazygit_toggle()
       lazygit:toggle()
     end
 
-    vim.keymap.set(
-      'n',
-      '<leader>gg',
-      '<cmd>lua _lazygit_toggle()<cr>',
-      { desc = 'Open LazyGit', noremap = true, silent = true }
-    )
-    vim.keymap.set('n', '<leader>tt', function()
+    local function toggle_or_init()
       vim.cmd([[ ToggleTermToggleAll ]])
 
       local buffers = vim.api.nvim_list_bufs()
@@ -51,6 +45,19 @@ return {
       if not toggleterm_exists then
         vim.cmd([[ exe 1 . "ToggleTerm direction=float" ]])
       end
+    end
+
+    local s = vim.keymap.set
+    s('n', '<leader>gg', function()
+      _lazygit_toggle()
+    end, { desc = 'Open LazyGit', noremap = true, silent = true })
+
+    s({ 't', 'n' }, '<C-t>', function()
+      toggle_or_init()
+    end, { desc = 'Hide Terminal', noremap = true })
+
+    s('n', '<leader>tt', function()
+      toggle_or_init()
     end, { desc = 'Open terminal', noremap = true })
   end,
 }
