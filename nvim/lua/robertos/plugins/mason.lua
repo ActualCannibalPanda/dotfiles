@@ -19,6 +19,7 @@ return {
           'ols',
           'rust_analyzer',
           'zls',
+          'pylyzer',
         },
         automatic_install = true,
       })
