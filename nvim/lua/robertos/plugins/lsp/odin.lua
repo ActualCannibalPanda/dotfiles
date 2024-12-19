@@ -1,7 +1,9 @@
+local on_attach = require('robertos.plugins.lsp.on_attach')
 return {
   setup = function(capabilities)
     require('lspconfig').ols.setup({
       capabilities = capabilities,
+      on_attach = on_attach,
     })
     vim.keymap.set(
       'n',
