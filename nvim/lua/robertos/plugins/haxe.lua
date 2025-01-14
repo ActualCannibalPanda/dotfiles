@@ -1,0 +1,3 @@
+return {
+  'kLabz/haxe.vim',
+}

@@ -15,11 +15,12 @@ return {
       require('mason-lspconfig').setup({
         ensure_installed = {
           'clangd',
+          'haxe_language_server',
           'lua_ls',
+          'pylyzer',
           'ols',
           'rust_analyzer',
           'zls',
-          'pylyzer',
         },
         automatic_install = true,
       })
