@@ -18,6 +18,10 @@ function init()
   o.shiftwidth = 0
   o.softtabstop = -1
   o.expandtab = true
+
+  if vim.g.neovide then
+    o.guifont = 'FiraCode Nerd Font'
+  end
 end
 
 return {
