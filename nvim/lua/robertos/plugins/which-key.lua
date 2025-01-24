@@ -9,6 +9,7 @@ return {
         group = 'Harpoon',
       },
     })
+    wk.setup()
   end,
   keys = {
     {
