@@ -1,7 +1,6 @@
-local bufnr = vim.api.nvim_get_current_buf()
-local bo = vim.bo[bufnr]
-bo.tabstop = 4
-bo.vartabstop = '4'
-bo.shiftwidth = 4
-bo.softtabstop = 4
-bo.expandtab = true
+-- tabs
+vim.bo.tabstop = 4
+vim.bo.vartabstop = '4'
+vim.bo.shiftwidth = 0
+vim.bo.softtabstop = -1
+vim.bo.expandtab = true
