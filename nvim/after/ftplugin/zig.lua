@@ -1,8 +1,7 @@
-local o = vim.opt
-
--- tabs
-o.tabstop = 4
-o.vartabstop = '4'
-o.shiftwidth = 0
-o.softtabstop = -1
-o.expandtab = true
+local bufnr = vim.api.nvim_get_current_buf()
+local bo = vim.bo[bufnr]
+bo.tabstop = 4
+bo.vartabstop = '4'
+bo.shiftwidth = 4
+bo.softtabstop = 4
+bo.expandtab = true
