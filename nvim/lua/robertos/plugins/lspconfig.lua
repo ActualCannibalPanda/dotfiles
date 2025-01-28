@@ -5,7 +5,6 @@ return {
     require('robertos.plugins.lsp.c').setup(capabilities)
     require('robertos.plugins.lsp.odin').setup(capabilities)
     require('robertos.plugins.lsp.python').setup(capabilities)
-    require('robertos.plugins.lsp.rust').setup(capabilities)
     require('robertos.plugins.lsp.zig').setup(capabilities)
   end,
 }
