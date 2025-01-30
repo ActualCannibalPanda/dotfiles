@@ -9,12 +9,21 @@
 	("org"   . "https://orgmode.org/elpa/")))
 
 (setq package-selected-packages
-      (quote ( ; theme
-	cyberpunk-theme)))
+      (quote (; theme
+	      cyberpunk-theme
+	      ; completion
+	      company
+	      ; vcs
+	      magit
+	      )))
 		     
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
+
+(dolist (package package-selected-packages)
+  (unless (package-installed-p package)
+    (package-install package)))
 
 (eval-when-compile (require 'use-package))
 
@@ -24,6 +33,7 @@
 
 (add-hook 'after-init-hook
 	  (lambda ()
-	    (load-theme 'cyberpunk t)))
+	    (load-theme 'cyberpunk t)
+	    (setq magit-define-global-key-bindings "recommended")))
 
 (load-file "./config/config.el")
