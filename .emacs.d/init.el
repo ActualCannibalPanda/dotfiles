@@ -17,13 +17,14 @@
 
 (setq package-selected-packages
       (quote (; theme
-	      cyberpunk-theme
+	      catppuccin-theme
 	      ; completion
 	      company
 	      ; vcs
 	      magit
 	      ; langs
 	      rust-mode
+	      cargo
 	      )))
 		     
 (unless (package-installed-p 'use-package)
@@ -42,7 +43,8 @@
 
 (add-hook 'after-init-hook
 	  (lambda ()
-	    (load-theme 'cyberpunk t)
+	    (setq catppuccin-flavor 'mocha)
+	    (load-theme 'catppuccin :no-confirm)
 	    (setq magit-define-global-key-bindings "recommended")))
 
 (setq files-to-load '("config"))
