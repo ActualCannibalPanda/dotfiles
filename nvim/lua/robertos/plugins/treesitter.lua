@@ -20,6 +20,7 @@ return {
       },
       indent = { enable = true },
     })
+    require('nvim-treesitter.install').compilers = { 'clang', 'cl' }
     require('rainbow-delimiters.setup').setup({})
   end,
 }
