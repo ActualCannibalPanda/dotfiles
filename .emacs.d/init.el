@@ -1,5 +1,10 @@
 (require 'package)
-(package-initialize)
+
+(setq inhibit-startup-screen t)
+
+(setq display-line-numbers-type 'relative)
+(global-display-line-numbers-mode)
+
 (setq package-enable-at-startup nil)
 
 (setq package-archives
@@ -8,6 +13,8 @@
 	("melpa" . "https://melpa.org/packages/")
 	("org"   . "https://orgmode.org/elpa/")))
 
+(package-initialize)
+
 (setq package-selected-packages
       (quote (; theme
 	      cyberpunk-theme
@@ -15,6 +22,8 @@
 	      company
 	      ; vcs
 	      magit
+	      ; langs
+	      rust-mode
 	      )))
 		     
 (unless (package-installed-p 'use-package)
@@ -36,4 +45,11 @@
 	    (load-theme 'cyberpunk t)
 	    (setq magit-define-global-key-bindings "recommended")))
 
-(load-file "./config/config.el")
+(setq files-to-load '("config"))
+
+(dolist (file files-to-load)
+  (add-to-list 'load-path
+	       (concat user-emacs-directory file)))
+
+(load "keymaps")
+(load "langs")
