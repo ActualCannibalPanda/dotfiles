@@ -19,11 +19,14 @@
 (setq package-selected-packages
       (quote (; theme
 	      catppuccin-theme
+	      ; font
+	      fira-code-mode
 	      ; completion
 	      company
 	      ; vcs
 	      magit
 	      ; langs
+	      lsp-mode
 	      rust-mode
 	      cargo
 	      )))
@@ -41,6 +44,13 @@
 (use-package use-package
   :config
   (setq use-package-always-ensure t))
+
+(use-package fira-code-mode
+  :config (global-fira-code-mode)
+  :hook prog-mode)
+
+(require 'fira-code-mode)
+(fira-code-mode-set-font)
 
 (add-hook 'after-init-hook
 	  (lambda ()

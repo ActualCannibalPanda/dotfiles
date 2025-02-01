@@ -4,5 +4,8 @@
 	    (setq indent-tabs-mode nil)
 	    (prettify-symbols-mode)))
 
-(add-hook 'rust-mode-hook 'eglot-ensure)
+(use-package rust-mode
+  :init
+  (setq rust-mode-treesitter-derive t))
+
 (add-hook 'rust-mode-hook 'cargo-minor-mode)
