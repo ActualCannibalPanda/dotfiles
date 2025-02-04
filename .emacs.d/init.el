@@ -39,6 +39,7 @@
 	      ; langs
 	      rust-mode
 	      cargo
+	      pipenv
 	      )))
 		     
 (unless (package-installed-p 'use-package)
