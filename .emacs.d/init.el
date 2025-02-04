@@ -1,3 +1,4 @@
+
 ;;; init --- Emacs initialisation
 ;;; -*- lexical-binding: t -*-
 
@@ -26,7 +27,7 @@
       (quote (; theme
 	      catppuccin-theme
 	      ; font
-	      fira-code-mode
+  	      fira-code-mode
 	      ; completion
 	      company
 	      ; vcs
@@ -36,6 +37,7 @@
 	      lsp-ui
 	      flycheck
 	      lsp-treemacs
+	      rainbow-delimiters
 	      ; langs
 	      rust-mode
 	      cargo
@@ -61,11 +63,17 @@
    :fetcher git
    :url "https://github.com/quelpa/quelpa-use-package.git"))
 (require 'quelpa-use-package)
+
 (eval-when-compile (require 'use-package))
 
 (use-package use-package
   :config
   (setq use-package-always-ensure t))
+
+(use-package siege-mode
+  :ensure quelpa
+  :quelpa (siege-mode :repo "tslilc/siege-mode" :fetcher github)
+  :bind (("M-s M-s" . siege-explicit-call)))
 
 (setq org-src-tab-acts-natively t)
 (setq org-src-preserve-indentation t)
@@ -73,6 +81,8 @@
 (add-hook 'after-init-hook
 	  (lambda ()
 	    (setq magit-define-global-key-bindings "recommended")))
+
+(add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
 
 (let ((files-to-load '("config")))
   (dolist (file files-to-load)
@@ -89,7 +99,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(org-contrib org catppuccin-theme company magit rust-mode cargo)))
+   '(org-contrib org catppuccin-theme company magit rust-mode cargo))
+ '(package-vc-selected-packages '((siege :url "https://github.com/tslilc/siege-mode"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
