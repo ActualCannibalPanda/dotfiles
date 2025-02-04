@@ -1,3 +1,9 @@
+;;; init --- Emacs initialisation
+;;; -*- lexical-binding: t -*-
+
+;;; Commentary:
+
+;;; Code:
 (require 'package)
 
 (setq inhibit-startup-screen t)
@@ -25,8 +31,12 @@
 	      company
 	      ; vcs
 	      magit
-	      ; langs
+	      ; features
 	      lsp-mode
+	      lsp-ui
+	      flycheck
+	      lsp-treemacs
+	      ; langs
 	      rust-mode
 	      cargo
 	      )))
@@ -45,15 +55,17 @@
   :config
   (setq use-package-always-ensure t))
 
+(setq org-src-tab-acts-natively t)
+(setq org-src-preserve-indentation t)
+
 (add-hook 'after-init-hook
 	  (lambda ()
 	    (setq magit-define-global-key-bindings "recommended")))
 
-(setq files-to-load '("config"))
-
-(dolist (file files-to-load)
-  (add-to-list 'load-path
-	       (concat user-emacs-directory file)))
+(let ((files-to-load '("config")))
+  (dolist (file files-to-load)
+    (add-to-list 'load-path
+		 (concat user-emacs-directory file))))
 
 (load "theme")
 (load "font")

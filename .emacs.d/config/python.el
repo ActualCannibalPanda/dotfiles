@@ -1,1 +1,1 @@
-(add-hook 'python-mode-hook 'lsp-deferred)
+; add python relevant code here
