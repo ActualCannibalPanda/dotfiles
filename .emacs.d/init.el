@@ -52,6 +52,9 @@
   (unless (package-installed-p package)
     (package-install package)))
 
+(setq quelpa-update-melpa-p nil)
+(setq quelpa-checkout-melpa-p nil)
+
 (unless (package-installed-p 'quelpa)
   (with-temp-buffer
     (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
@@ -73,7 +76,7 @@
 (use-package siege-mode
   :ensure quelpa
   :quelpa (siege-mode :repo "tslilc/siege-mode" :fetcher github)
-  :bind (("M-s M-s" . siege-explicit-call)))
+  :hook (prog-mode . siege-mode))
 
 (setq org-src-tab-acts-natively t)
 (setq org-src-preserve-indentation t)
