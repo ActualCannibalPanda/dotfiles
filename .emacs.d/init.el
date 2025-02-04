@@ -45,17 +45,8 @@
   :config
   (setq use-package-always-ensure t))
 
-(use-package fira-code-mode
-  :config (global-fira-code-mode)
-  :hook prog-mode)
-
-(require 'fira-code-mode)
-(fira-code-mode-set-font)
-
 (add-hook 'after-init-hook
 	  (lambda ()
-	    (setq catppuccin-flavor 'mocha)
-	    (load-theme 'catppuccin :no-confirm)
 	    (setq magit-define-global-key-bindings "recommended")))
 
 (setq files-to-load '("config"))
@@ -64,6 +55,8 @@
   (add-to-list 'load-path
 	       (concat user-emacs-directory file)))
 
+(load "theme")
+(load "font")
 (load "keymaps")
 (load "langs")
 (custom-set-variables
@@ -72,7 +65,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(eglot org-contrib org catppuccin-theme company magit rust-mode cargo)))
+   '(org-contrib org catppuccin-theme company magit rust-mode cargo)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
