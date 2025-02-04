@@ -1,0 +1,191 @@
+;-*- eval: (load-file "./init-def.el"); -*-
+#+title: My Emacs Configuration
+#+options: ^:{} html-postamble: nil
+#+property: header-args :mkdirp yes :tangle yes :tanglemdoe #o444 :results silent :nowwb yes
+#+startup: no-indent
+* An Explanation
+This is a literate configuration for =Emacs=.
+Tangling this file creates an Elisp file, =~/.emacs.d/lisp/init.el=.
+* Bootstrapping
+** early-init
+:PROPERTIES:
+:header-args: :tangle mode o44 :results silent :tangle ~/.emacs.d/early-init.el
+:END:
+#+begin_src emacs-lisp :lexical t
+;;; early-init.el --- Emacs pre package.el & GUI Configuration -*- lexical-binding: t; -*-
+;;; Code:
+#+end_src
+
+#+begin_src emacs-lisp :lexical t
+(setq package-enable-at-startup nil)
+(setq inhibit-default-init nil)
+#+end_src
+
+*** provide early-init
+#+begin_src emacs-lisp :lexical t
+(provide 'early-init)
+#+end_src
+
+** lexical binding
+The following line turns on lexical binding for performace reasons.
+#+begin_src emacs-lsp :lexical t
+;; -*- lexical-binding: t -*-
+#+end_src
+
+** profiling
+This function displays how long emacs took to start
+#+begin_src emacs-lisp :lexical t
+(add-hook
+ 'elpaca-after-init-hook
+ (lambda ()
+   (message "Emacs loaded in %s with %d garbage collections."
+	    (format "%.2f seconds"
+		    (float-time
+		     (time-subtract (current-time) before-init-time)))
+	    gcs-done)))
+#+end_src
+
+** Elpaca
+#+begin_quote
+An elisp package manager
+
+https://github.com/progfolio/elpaca
+#+end_quote
+
+*** Installer
+#+begin_src emacs-lisp :lexical t
+(defvar elpaca-installer-version 0.9)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil :depth 1 :inherit ignore
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (< emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let* ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                  ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                  ,@(when-let* ((depth (plist-get order :depth)))
+                                                      (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                  ,(plist-get order :repo) ,repo))))
+                  ((zerop (call-process "git" nil buffer t "checkout"
+                                        (or (plist-get order :ref) "--"))))
+                  (emacs (concat invocation-directory invocation-name))
+                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                  ((require 'elpaca))
+                  ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (load "./elpaca-autoloads")))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
+#+end_src
+
+#+begin_src emacs-lisp :lexical t
+(elpaca elpaca-use-package
+  (require 'elpaca-use-package)
+  (elpaca-use-package-mode)
+  (setq use-package-always-ensure t))
+#+end_src
+
+* Packages
+:PROPERTIES:
+:VISIBILITY: children
+:CUSTOM_ID: init-packages
+:END:
+** catppuccin theme
+#+begin_src emacs-lisp :lexical t
+(use-package catppuccin-theme
+  (setq catppuccin-flavor 'mocha)
+  (load-theme 'catppuccin :no-confirm))
+#+end_src
+
+** fira code mode
+#+begin_src emacs-lisp :lexical t
+(use-package fira-code-mode
+  :config
+  (global-fira-code-mode)
+  (fira-code-mode-set-font)
+  :hook prog-mode)
+#+end_src
+
+** magit
+#+begin_src emacs-lisp :lexical t
+(use-package magit
+  :config
+  (add-hook
+   'after-init-hook
+   (lambda ()
+     (setq magit-define-global-key-bindings "recommended"))))
+#+end_src
+
+** company
+#+begin_src emacs-lisp :lexical t
+(use-package company)
+#+end_src
+
+** lsp-mode
+#+begin_src emacs-lisp :lexical t
+(use-package lsp
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :hook ((rust-mode . lsp-deferred)
+	 (python-mode . lsp-deferred)
+	 (c-mode . lsp-deferred)
+	 (c++-mode . lsp-deferred))
+  :commands (lsp lsp-deferred))
+
+(use-package lsp-ui
+  :commands lsp-ui-mode)
+#+end_src
+
+** lsp-ui
+#+begin_src emacs-lisp :lexical t
+(use-package lsp-ui
+  :commands lsp-ui-mode)
+#+end_src
+
+** flycheck
+#+begin_src emacs-lisp :lexical t
+(use-package
+  :ensure t
+  :config
+  (add-hook 'after-init-hook 'global-flycheck-mode))
+#+end_src
+
+** lsp-treemacs
+#+begin_src emacs-lisp :lexical t
+(use-package lsp-treemacs
+  :commands lsp-treemacs-errors-list)
+#+end_src
+
+** rust-mode
+#+begin_src emacs-lisp :lexical t
+(use-package rust-mode
+  :config
+  (setq rust0mode-treesitter-derive t)
+  (setq rust-format-on-save t)
+  (prettify-symbols-mode))
+#+end_src
+
+** cargo
+#+begin_src emacs-lisp :lexical t
+(use-package cargo
+  :config
+  (add-hook 'rust-mode-hook 'cargo-minor-mode))
+#+end_src
+
+**
