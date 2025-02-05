@@ -5,36 +5,27 @@
 (load "rust")
 (load "python-init")
 
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+	       '(python-mode . ("jedi-language-server")))
+  (add-to-list 'eglot-stay-out-of 'flymake))
+
+(setq-default eglot-workspace-configuration
+              '(:completions
+                (:completeFunctionCalls t)))
+
+(add-hook 'python-mode-hook 'eglot-ensure)
+
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode))
 
-(use-package lsp-mode
+(use-package jedi
+  :after (epc pos-tip)
   :init
-  (setq lsp-keymap-prefix "C-c l")
-  :hook ((rust-mode . lsp-deferred)
-	 (python-mode . lsp-deferred)
-	 (c-mode . lsp-deferred)
-	 (c++-mode . lsp-deferred))
-  :commands (lsp lsp-deferred))
-
-(use-package lsp-ui
-  :commands lsp-ui-mode
-  :hook (lsp-mode . lsp-ui-mode)
-  :config
-  (setq lsp-ui-sideline-enable t)
-  (setq lsp-ui-sideline-show-hover nil)
-  (setq lsp-ui-doc-position 'bottom))
-
-
-(use-package lsp-treemacs
-  :commands lsp-treemacs-errors-list)
-
-(use-package company
-  :after lsp
-  :hook (python-mode . company-mode)
-  :config
-  (setq lsp-completion-provider :capf))
+  (add-hook 'python-mode-hook 'jedi:setup)
+  (add-hook 'python-mode-hook 'jedi:ac-setup)
+  :config)
 
 (provide 'langs)
 ;;; langs.el ends here
