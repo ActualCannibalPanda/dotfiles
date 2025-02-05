@@ -1,3 +1,6 @@
+;;; keymaps.el --- keymap settings -*- lexical-binding: t -*-
+;;; Commentary:
+;;; Code:
 (defun insert-line-below ()
   "Insert an empty line below the current line."
   (interactive)
@@ -16,3 +19,6 @@
 
 (keymap-global-set "M-n" 'insert-line-below)
 (keymap-global-set "M-p" 'insert-line-above)
+
+(provide 'keymaps)
+;;; keymaps.el ends here

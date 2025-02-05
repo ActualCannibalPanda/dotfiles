@@ -1,3 +1,6 @@
+;;; langs.el --- Language defs -*- lexical-binding: t -*-
+;;; Commentary:
+;;; Code:
 (load "c")
 (load "rust")
 (load "python-init")
@@ -31,3 +34,6 @@
   :hook (python-mode . company-mode)
   :config
   (setq lsp-completion-provider :capf))
+
+(provide 'langs)
+;;; langs.el ends here

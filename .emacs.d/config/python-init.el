@@ -1,5 +1,6 @@
-(require 'python)
-
+;;; python-init.el --- python settings -*- lexical-binding: t -*-
+;;; Commentary:
+;;; Code:
 (use-package pipenv
   :hook
   (python-mode . pipenv-mode))
@@ -8,3 +9,6 @@
   :ensure t
   :custom (lsp-pyright-langserver-command "pyright")
   :hook (python-mode . (lambda () (require 'lsp-pyright))))
+
+(provide 'python-init)
+;;; python-init.el ends here
