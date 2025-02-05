@@ -26,6 +26,7 @@
   (setq lsp-ui-sideline-show-hover nil)
   (setq lsp-ui-doc-position 'bottom))
 
+
 (use-package lsp-treemacs
   :commands lsp-treemacs-errors-list)
 

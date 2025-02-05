@@ -45,6 +45,33 @@ This function displays how long emacs took to start
 	    gcs-done)))
 #+end_src
 
+** Quela
+#+begin_quote
+Quela is used for github packages only so we turn off melpa update and checkout.
+
+https://github.com/quelpa/quelpa
+#+end_quote
+
+*** Installer
+#+begin_src emacs-lisp :lexical t
+(setq quelpa-update-melpa-p nil)
+(setq quelpa-checkout-melpa-p nil)
+
+(unless (package-installed-p 'quelpa)
+  (with-temp-buffer
+    (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
+    (eval-buffer)
+    (quelpa-self-upgrade)))
+
+(quelpa
+ '(quelpa-use-package
+   :fetcher git
+   :url "https://github.com/quelpa/quelpa-use-package.git"))
+(require 'quelpa-use-package)
+#+end_src
+
+***
+
 ** Elpaca
 #+begin_quote
 An elisp package manager
@@ -125,16 +152,19 @@ https://github.com/progfolio/elpaca
 ** magit
 #+begin_src emacs-lisp :lexical t
 (use-package magit
-  :config
-  (add-hook
-   'after-init-hook
-   (lambda ()
-     (setq magit-define-global-key-bindings "recommended"))))
+  :hook
+  (after-init .
+	      (lambda ()
+		(setq magit-define-global-key-bindings "recommended"))))
 #+end_src
 
 ** company
 #+begin_src emacs-lisp :lexical t
-(use-package company)
+(use-package company
+  :after lsp
+  :hook (lsp-mode . company-mode)
+  :config
+  (setq lsp-completion-provider :capf))
 #+end_src
 
 ** lsp-mode
@@ -147,23 +177,33 @@ https://github.com/progfolio/elpaca
 	 (c-mode . lsp-deferred)
 	 (c++-mode . lsp-deferred))
   :commands (lsp lsp-deferred))
-
-(use-package lsp-ui
-  :commands lsp-ui-mode)
 #+end_src
 
 ** lsp-ui
 #+begin_src emacs-lisp :lexical t
 (use-package lsp-ui
-  :commands lsp-ui-mode)
+  :commands lsp-ui-mode
+  :hook (lsp-mode . lsp-ui-mode)
+  :config
+  (setq lsp-ui-sideline-enable t)
+  (setq lsp-ui-sideline-show-hover nil)
+  (setq lsp-ui-doc-position 'bottom))
 #+end_src
+
+** lsp-pyright
+#+begin_src emacs-lisp :lexical t
+(use-package lsp-pyright
+  :ensure t
+  :custom (lsp-pyright-langserver-command "pyright")
+  :hook (python-mode . (lambda () (require 'lsp-pyright))))
+#+end_src
+
 
 ** flycheck
 #+begin_src emacs-lisp :lexical t
 (use-package
   :ensure t
-  :config
-  (add-hook 'after-init-hook 'global-flycheck-mode))
+  :init (global-flycheck-mode))
 #+end_src
 
 ** lsp-treemacs
@@ -176,7 +216,7 @@ https://github.com/progfolio/elpaca
 #+begin_src emacs-lisp :lexical t
 (use-package rust-mode
   :config
-  (setq rust0mode-treesitter-derive t)
+  (setq rust-mode-treesitter-derive t)
   (setq rust-format-on-save t)
   (prettify-symbols-mode))
 #+end_src
@@ -184,8 +224,23 @@ https://github.com/progfolio/elpaca
 ** cargo
 #+begin_src emacs-lisp :lexical t
 (use-package cargo
-  :config
-  (add-hook 'rust-mode-hook 'cargo-minor-mode))
+  :hook (rust-mode-hook . cargo-mode))
 #+end_src
 
-**
+** siege-mode
+#+begin_src emacs-lisp :lexical t
+(use-package siege-mode
+  :ensure quelpa
+  :quelpa (siege-mode :repo "tslilc/siege-mode" :fetcher github)
+  :hook (prog-mode . siege-mode))
+#+end_src
+
+** python-mode
+#+begin_src emacs-lisp :lexical t
+(use-package python-mode)
+#+end_src
+
+** pipenv
+#+begin_src emacs-lisp :lexical t
+
+#+end_src
