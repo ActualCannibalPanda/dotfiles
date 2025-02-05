@@ -75,9 +75,6 @@
   :quelpa (siege-mode :repo "tslilc/siege-mode" :fetcher github)
   :hook (prog-mode . siege-mode))
 
-(setq org-src-tab-acts-natively t)
-(setq org-src-preserve-indentation t)
-
 (add-hook 'after-init-hook
 	  (lambda ()
 	    (setq magit-define-global-key-bindings "recommended")))
@@ -93,6 +90,7 @@
 (load "font")
 (load "keymaps")
 (load "langs")
+(load "myorg")
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
