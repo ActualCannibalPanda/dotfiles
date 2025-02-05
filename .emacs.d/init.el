@@ -34,6 +34,7 @@
 	      magit
 	      ; features
 	      lsp-mode
+	      lsp-pyright
 	      lsp-ui
 	      flycheck
 	      lsp-treemacs
@@ -102,8 +103,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(org-contrib org catppuccin-theme company magit rust-mode cargo))
- '(package-vc-selected-packages '((siege :url "https://github.com/tslilc/siege-mode"))))
+  '(org-contrib org catppuccin-theme company magit rust-mode cargo)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
