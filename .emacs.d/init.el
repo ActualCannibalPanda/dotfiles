@@ -11,15 +11,16 @@
 (setq package-enable-at-startup nil)
 
 (setq package-archives
-      '(("ELPA"   . "http://tromey.com/elpa/")
-	("gnu"    . "http://elpa.gnu.org/packages/")
-	("melpa"  . "https://melpa.org/packages/")
-	("org"    . "https://orgmode.org/elpa/")
-	("nongnu" . "https://elpa.nongnu.org/nongnu/")))
+      '(("ELPA"      . "http://tromey.com/elpa/")
+	("gnu"       . "http://elpa.gnu.org/packages/")
+	("melpa"     . "https://melpa.org/packages/")
+	("org"       . "https://orgmode.org/elpa/")
+	("gnu-devel" . "https://elpa.gnu.org/devel/")
+	("nongnu"    . "https://elpa.nongnu.org/nongnu/")))
 
 (package-initialize)
 
-(setq package-selected-packages
+(setq packages
       (quote (; theme
 	      catppuccin-theme
 	      ; font
@@ -30,8 +31,8 @@
 	      magit
 	      ; features
 	      lsp-mode
-	      lsp-pyright
-	      lsp-ui
+	      company
+	      company-jedi
 	      flycheck
 	      lsp-treemacs
 	      rainbow-delimiters
@@ -45,7 +46,7 @@
   (package-refresh-contents)
   (package-install 'use-package))
 
-(dolist (package package-selected-packages)
+(dolist (package packages)
   (unless (package-installed-p package)
     (package-install package)))
 
@@ -81,16 +82,156 @@
 
 (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
 
-(let ((files-to-load '("config")))
-  (dolist (file files-to-load)
-    (add-to-list 'load-path
-		 (concat user-emacs-directory file))))
+;; =============================================
+;; theme
+;; =============================================
+(add-hook 'after-init-hook
+	  (lambda ()
+	    (setq catppuccin-flavor 'mocha)
+	    (load-theme 'catppuccin :no-confirm)))
 
-(load "theme")
-(load "font")
-(load "keymaps")
-(load "langs")
-(load "myorg")
+;; =============================================
+;; font
+;; =============================================
+(use-package fira-code-mode
+  :config
+  (global-fira-code-mode)
+  (fira-code-mode-set-font)
+  :hook prog-mode)
+
+;; =============================================
+;; keymaps
+;; =============================================
+(defun insert-line-below ()
+  "Insert an empty line below the current line."
+  (interactive)
+  (save-excursion
+    (end-of-line)
+    (open-line 1)
+    (forward-line 1)))
+
+(defun insert-line-above ()
+  "Insert an empty line above the current line."
+  (interactive)
+  (save-excursion
+    (move-beginning-of-line 0)
+    (open-line -1)
+    (forward-line -1)))
+
+(keymap-global-set "M-n" 'insert-line-below)
+(keymap-global-set "M-p" 'insert-line-above)
+
+(with-eval-after-load 'company
+  (define-key
+   company-active-map
+   (kbd "M-/") 'company-complete)
+  (define-key
+   company-active-map
+   (kbd "TAB") 'company-complete-common-or-cycle)
+  (define-key
+   company-active-map
+   (kbd "<backtab>")
+   (lambda ()
+     (interactive)
+     (company-complete-common-or-cycle -1))))
+
+;; =============================================
+;; c
+;; =============================================
+(setq c-offsets-alist '((member-init-intro . ++)))
+
+(defconst my-c-style
+  '((c-tab-always-indent . t)
+    (c-comment-line-offset . 2)
+    (c-echo-syntactic-information-p . t)))
+
+(c-add-style "PERSONAL" my-c-style)
+
+(defun my-c-mode-common-hook ()
+  "My \='c-mode' settings."
+  (c-set-style "PERSONAL")
+  (setq-default tab-width 2)
+  (setq-default indent-tabs-mode nil)
+  (setq indent-line-function 'insert-tab)
+  (c-toggle-auto-newline 1))
+(add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
+
+;; =============================================
+;; rust
+;; =============================================
+(add-hook 'rust-mode-hook
+	  (lambda ()
+	    (setq rust-format-on-save t)
+	    (setq indent-tabs-mode nil)
+	    (prettify-symbols-mode)))
+
+(use-package rust-mode
+  :config
+  (setq rust-mode-treesitter-derive t))
+
+(add-hook 'rust-mode-hook 'cargo-minor-mode)
+
+
+;; =============================================
+;; python
+;; =============================================
+(use-package pipenv
+  :hook
+  (python-mode . pipenv-mode))
+
+(use-package company-jedi
+  :hook
+  (python-mode .(lambda ()
+		  (add-to-list 'company-backends 'company-jedi))))
+
+;; =============================================
+;; company options
+;; =============================================
+(use-package company
+  :config
+  (add-hook 'after-init-hook 'global-company-mode)
+  (setq company-idle-delay
+	(lambda ()
+	  (if (company-in-string-or-comment)
+	      nil
+	    0)))
+
+;; =============================================
+;; eglot options
+;; =============================================
+(with-eval-after-load 'eglot
+  (add-to-list 'eglot-server-programs
+	       '(python-mode . ("jedi-language-server")))
+  (add-to-list 'eglot-stay-out-of 'flymake))
+
+(setq-default eglot-workspace-configuration
+              '(:completions
+                (:completeFunctionCalls t)))
+
+(add-hook 'python-mode-hook 'eglot-ensure)
+
+;; =============================================
+;; flycheck
+;; =============================================
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
+
+;; ==============================================
+;; org-mode
+;; ==============================================
+(require 'org)
+(keymap-global-set "C-c l"  'org-store-link)
+(keymap-global-set "C-c a" 'org-agenda)
+(setq org-log-done t)
+(setq org-src-tab-acts-natively t)
+(setq org-src-preserve-indentation t)
+(setq org-todo-keyword-faces
+      '(("TODO" . org-warning)
+       ("STARTED" . "yellow")
+       ("CANCELED" . (:foreground "blue" :weight bold))
+       ("DONE" . "green")))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
