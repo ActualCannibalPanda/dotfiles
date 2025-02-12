@@ -141,17 +141,15 @@
 ;; =============================================
 ;; rust
 ;; =============================================
-(add-hook 'rust-mode-hook
-	  (lambda ()
-	    (setq rust-format-on-save t)
-	    (setq indent-tabs-mode nil)
-	    (prettify-symbols-mode)))
-
 (use-package rust-mode
   :config
-  (setq rust-mode-treesitter-derive t))
-
-(add-hook 'rust-mode-hook 'cargo-minor-mode)
+  (setq rust-mode-treesitter-derive t)
+  :hook ((rust-mode . cargo-minor-mode)
+	 (rust-mode . eglot-ensure)
+	 (rust-mode . (lambda ()
+	    (setq rust-format-on-save t)
+	    (setq indent-tabs-mode nil)
+	    (prettify-symbols-mode)))))
 
 ;; =============================================
 ;; company options
