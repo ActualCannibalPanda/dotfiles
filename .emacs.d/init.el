@@ -19,8 +19,12 @@
 	("nongnu"    . "https://elpa.nongnu.org/nongnu/")))
 
 (package-initialize)
+		     
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
 
-(setq packages
+(let ((packages
       (quote (; theme
 	      catppuccin-theme
 	      ; font
@@ -30,25 +34,18 @@
 	      ; vcs
 	      magit
 	      ; features
-	      lsp-mode
 	      company
 	      company-jedi
 	      flycheck
-	      lsp-treemacs
 	      rainbow-delimiters
 	      ; langs
 	      rust-mode
 	      cargo
 	      pipenv
-	      )))
-		     
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-(dolist (package packages)
-  (unless (package-installed-p package)
-    (package-install package)))
+	      ))))
+  (dolist (package packages)
+    (unless (package-installed-p package)
+      (package-install package))))
 
 (setq quelpa-update-melpa-p nil)
 (setq quelpa-checkout-melpa-p nil)
@@ -121,20 +118,6 @@
 (keymap-global-set "M-n" 'insert-line-below)
 (keymap-global-set "M-p" 'insert-line-above)
 
-(with-eval-after-load 'company
-  (define-key
-   company-active-map
-   (kbd "M-/") 'company-complete)
-  (define-key
-   company-active-map
-   (kbd "TAB") 'company-complete-common-or-cycle)
-  (define-key
-   company-active-map
-   (kbd "<backtab>")
-   (lambda ()
-     (interactive)
-     (company-complete-common-or-cycle -1))))
-
 ;; =============================================
 ;; c
 ;; =============================================
@@ -171,6 +154,24 @@
 
 (add-hook 'rust-mode-hook 'cargo-minor-mode)
 
+;; =============================================
+;; company options
+;; =============================================
+(use-package company
+  :init
+  (add-hook 'after-init-hook 'global-company-mode)
+  :config
+  (global-company-mode 1)
+  (setq company-minimum-prefix-length 1)
+  (setq company-idle-delay
+	(lambda ()
+	  (if (company-in-string-or-comment) nil 0)))
+  :bind (("M-/" . company-complete)
+	 ("TAB" . company-complete-common-or-cycle)
+	 ("<backtab>" .
+	  (lambda ()
+	    (interactive)
+	    (company-complete-common-or-cycle -1)))))
 
 ;; =============================================
 ;; python
@@ -179,22 +180,11 @@
   :hook
   (python-mode . pipenv-mode))
 
-(use-package company-jedi
-  :hook
-  (python-mode .(lambda ()
-		  (add-to-list 'company-backends 'company-jedi))))
-
-;; =============================================
-;; company options
-;; =============================================
-(use-package company
-  :config
-  (add-hook 'after-init-hook 'global-company-mode)
-  (setq company-idle-delay
-	(lambda ()
-	  (if (company-in-string-or-comment)
-	      nil
-	    0)))
+(with-eval-after-load 'company
+  (use-package company-jedi
+    :config
+    (add-hook 'python-mode-hook
+	      (lambda () (add-to-list 'company-backends 'company-jedi)))))
 
 ;; =============================================
 ;; eglot options
@@ -203,10 +193,6 @@
   (add-to-list 'eglot-server-programs
 	       '(python-mode . ("jedi-language-server")))
   (add-to-list 'eglot-stay-out-of 'flymake))
-
-(setq-default eglot-workspace-configuration
-              '(:completions
-                (:completeFunctionCalls t)))
 
 (add-hook 'python-mode-hook 'eglot-ensure)
 
