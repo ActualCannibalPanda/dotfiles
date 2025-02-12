@@ -31,11 +31,10 @@
   	      fira-code-mode
 	      ; completion
 	      company
+	      company-jedi
 	      ; vcs
 	      magit
 	      ; features
-	      company
-	      company-jedi
 	      flycheck
 	      rainbow-delimiters
 	      ; langs
@@ -161,21 +160,30 @@
   :init
   (add-hook 'after-init-hook 'global-company-mode)
   :config
-  (global-company-mode 1)
-  (setq company-minimum-prefix-length 1)
-  (setq company-idle-delay
-	(lambda ()
-	  (if (company-in-string-or-comment) nil 0)))
+  (setq company-minimum-prefix-length 1
+	company-idle-delay 0.1
+	company-show-numbers t
+	comapnt-tooltip-idle-delay 0.1
+	company-tooltip-limit 20
+	company-require-match nil
+	company-frontends '(company-pseudo-tooltip-unless-just-one-frontend
+			    company-preview-frontend
+			    company-echo-metadata-frontend)
+	company-backends '(company-capf))
   :bind (("M-/" . company-complete)
+	 :map company-active-map
 	 ("TAB" . company-complete-common-or-cycle)
 	 ("<backtab>" .
 	  (lambda ()
 	    (interactive)
-	    (company-complete-common-or-cycle -1)))))
+	    (company-complete-common-or-cycle -1)))
+	 ("C-SPC" . company-complete-common)))
 
 ;; =============================================
 ;; python
 ;; =============================================
+(use-package python
+  :hook ((python-mode . eglot-ensure)))
 (use-package pipenv
   :hook
   (python-mode . pipenv-mode))
@@ -183,18 +191,17 @@
 (with-eval-after-load 'company
   (use-package company-jedi
     :config
-    (add-hook 'python-mode-hook
-	      (lambda () (add-to-list 'company-backends 'company-jedi)))))
+    (add-to-list 'company-backends 'company-jedi)))
 
 ;; =============================================
 ;; eglot options
 ;; =============================================
 (with-eval-after-load 'eglot
   (add-to-list 'eglot-server-programs
-	       '(python-mode . ("jedi-language-server")))
+	       '((python-mode . ("jedi-language-server"))
+		 (rust-mode . ("rustup" "run" "stable" "rust-analyzer" :initializationOptions
+			       (:check (:command "clippy"))))))
   (add-to-list 'eglot-stay-out-of 'flymake))
-
-(add-hook 'python-mode-hook 'eglot-ensure)
 
 ;; =============================================
 ;; flycheck
