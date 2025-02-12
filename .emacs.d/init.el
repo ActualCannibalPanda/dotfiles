@@ -136,6 +136,7 @@
   (setq indent-line-function 'insert-tab)
   (c-toggle-auto-newline 1))
 (add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
+(add-hook 'c-mode-common-hook 'eglot-ensure)
 
 ;; =============================================
 ;; rust
@@ -197,7 +198,9 @@
   (add-to-list 'eglot-server-programs
 	       '((python-mode . ("jedi-language-server"))
 		 (rust-mode . ("rustup" "run" "stable" "rust-analyzer" :initializationOptions
-			       (:check (:command "clippy"))))))
+			       (:check (:command "clippy"))))
+		 (c-mode . ("clangd"))
+		 (c++-mode . ("clangd"))))
   (add-to-list 'eglot-stay-out-of 'flymake))
 
 ;; =============================================
