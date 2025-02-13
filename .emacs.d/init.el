@@ -179,10 +179,10 @@
   (setq company-minimum-prefix-length 1
 	company-idle-delay 0.1
 	company-show-numbers t
-	comapnt-tooltip-idle-delay 0.1
+	company-tooltip-idle-delay 0.1
 	company-tooltip-limit 20
 	company-require-match nil
-	company-frontends '(company-pseudo-tooltip-unless-just-one-frontend
+	company-frontends '(company-pseudo-tooltip-frontend
 			    company-preview-frontend
 			    company-echo-metadata-frontend)
 	company-backends '(company-capf))
