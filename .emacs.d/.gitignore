@@ -5,3 +5,4 @@ server/
 eln-cache/
 .lsp-session-v1
 quelpa/
+tree-sitter/

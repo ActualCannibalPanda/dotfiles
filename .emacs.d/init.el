@@ -38,6 +38,7 @@
 	      flycheck
 	      rainbow-delimiters
 	      ; langs
+	      cmake-ide
 	      rust-mode
 	      cargo
 	      pipenv
@@ -71,6 +72,33 @@
   :ensure quelpa
   :quelpa (siege-mode :repo "tslilc/siege-mode" :fetcher github)
   :hook (prog-mode . siege-mode))
+
+(use-package treesit-auto
+  :ensure quelpa
+  :demand t
+  :quelpa (treesit-auto :repo "renzmann/treesit-auto" :fetcher github)
+  :init
+  (setq treesit-language-source-alist
+	'((bash "https://github.com/tree-sitter/tree-sitter-bash")
+	  (c "https://github.com/tree-sitter/tree-sitter-c")
+	  (cmake "https://github.com/uyha/tree-sitter-cmake")
+	  (common-lisp "https://github.com/theHamsta/tree-sitter-commonlisp")
+	  (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+	  (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+	  (go "https://github.com/tree-sitter/tree-sitter-go")
+	  (go-mod "https://github.com/camdencheek/tree-sitter-go-mod")
+	  (html "https://github.com/tree-sitter/tree-sitter-html")
+	  (js . ("https://github.com/tree-sitter/tree-sitter-javascript" "master" "src"))
+	  (json "https://github.com/tree-sitter/tree-sitter-json")
+	  (lua "https://github.com/Azganoth/tree-sitter-lua")
+	  (make "https://github.com/alemuller/tree-sitter-make")
+	  (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+	  (python "https://github.com/tree-sitter/tree-sitter-python")
+	  (rust "https://github.com/tree-sitter/tree-sitter-rust")
+	  (toml "https://github.com/tree-sitter/tree-sitter-toml")))
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
 
 (add-hook 'after-init-hook
 	  (lambda ()
@@ -119,24 +147,14 @@
 ;; =============================================
 ;; c
 ;; =============================================
-(setq c-offsets-alist '((member-init-intro . ++)))
+(add-hook 'c-mode-hook 'eglot-ensure)
+(add-hook 'c++-mode-hook 'eglot-ensure)
+(add-hook 'c++-ts-mode-hook 'eglot-ensure)
+(add-hook 'c-ts-mode-hook 'eglot-ensure)
 
-(defconst my-c-style
-  '((c-tab-always-indent . t)
-    (c-comment-line-offset . 2)
-    (c-echo-syntactic-information-p . t)))
-
-(c-add-style "PERSONAL" my-c-style)
-
-(defun my-c-mode-common-hook ()
-  "My \='c-mode' settings."
-  (c-set-style "PERSONAL")
-  (setq-default tab-width 2)
-  (setq-default indent-tabs-mode nil)
-  (setq indent-line-function 'insert-tab)
-  (c-toggle-auto-newline 1))
-(add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
-(add-hook 'c-mode-common-hook 'eglot-ensure)
+(use-package cmake-ide
+  :config
+  (cmake-ide-setup))
 
 ;; =============================================
 ;; rust
@@ -182,6 +200,7 @@
 ;; =============================================
 (use-package python
   :hook ((python-mode . eglot-ensure)))
+
 (use-package pipenv
   :hook
   (python-mode . pipenv-mode))
@@ -199,8 +218,8 @@
 	       '((python-mode . ("jedi-language-server"))
 		 (rust-mode . ("rustup" "run" "stable" "rust-analyzer" :initializationOptions
 			       (:check (:command "clippy"))))
-		 (c-mode . ("clangd"))
-		 (c++-mode . ("clangd"))))
+		 ((c++-mode c++-ts-mode) . ("clangd"))
+		 ((c-mode c-ts-mode) . ("clangd"))))
   (add-to-list 'eglot-stay-out-of 'flymake))
 
 ;; =============================================
