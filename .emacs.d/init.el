@@ -5,9 +5,12 @@
 
 (setq inhibit-startup-screen t)
 
+(setq load-prefer-new t)
+
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode)
 
+(setq package-install-upgrade-built-in t)
 (setq package-enable-at-startup nil)
 
 (setq package-archives
@@ -32,14 +35,19 @@
 	      ; completion
 	      company
 	      company-jedi
+	      yasnippet
+	      ; lsp
+	      lsp-mode
+	      lsp-ui
 	      ; vcs
 	      magit
 	      ; features
 	      flycheck
 	      rainbow-delimiters
 	      ; langs
+	      powershell
 	      cmake-ide
-	      rust-mode
+	      rustic
 	      cargo
 	      pipenv
 	      ))))
@@ -47,8 +55,8 @@
     (unless (package-installed-p package)
       (package-install package))))
 
-(setq quelpa-update-melpa-p nil)
-(setq quelpa-checkout-melpa-p nil)
+(defvar quelpa-update-melpa-p nil)
+(defvar quelpa-checkout-melpa-p nil)
 
 (unless (package-installed-p 'quelpa)
   (with-temp-buffer
@@ -95,7 +103,8 @@
 	  (markdown "https://github.com/ikatyang/tree-sitter-markdown")
 	  (python "https://github.com/tree-sitter/tree-sitter-python")
 	  (rust "https://github.com/tree-sitter/tree-sitter-rust")
-	  (toml "https://github.com/tree-sitter/tree-sitter-toml")))
+	  (toml "https://github.com/tree-sitter/tree-sitter-toml")
+	  (powershell "https://github.com/airbus-cert/tree-sitter-powershell.git")))
   :config
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
@@ -147,11 +156,6 @@
 ;; =============================================
 ;; c
 ;; =============================================
-(add-hook 'c-mode-hook 'eglot-ensure)
-(add-hook 'c++-mode-hook 'eglot-ensure)
-(add-hook 'c++-ts-mode-hook 'eglot-ensure)
-(add-hook 'c-ts-mode-hook 'eglot-ensure)
-
 (use-package cmake-ide
   :config
   (cmake-ide-setup))
@@ -160,33 +164,75 @@
 ;; rust
 ;; =============================================
 (use-package rust-mode
+  :ensure t
   :config
-  (setq rust-mode-treesitter-derive t)
-  :hook ((rust-mode . cargo-minor-mode)
-	 (rust-mode . eglot-ensure)
-	 (rust-mode . (lambda ()
-	    (setq rust-format-on-save t)
-	    (setq indent-tabs-mode nil)
-	    (prettify-symbols-mode)))))
+  (rustic-mode))
+
+(use-package rustic
+  :ensure t
+  :bind (:map rustic-mode-map
+	      ("M-j" . lsp-ui-menu)
+	      ("M-?" . lsp-find-references)
+	      ("C-c C-c l" . flycheck-list-errors)
+	      ("C-c C-c a" . lsp-execute-code-action)
+	      ("C-c C-c r" . lsp-rename)
+	      ("C-c C-c q" . lsp-workspace-restart)
+	      ("C-c C-c Q" . lsp-workspace-shutdown)
+	      ("C-c C-c s" . lsp-rust-analyzer-status))
+  :config
+  (setq rustic-format-on-save t)
+  :hook
+  (add-hook 'rustic-mode-hook 'my/rustic-mode-hook))
+
+(defun my/rustic-mode-hook ()
+  "A hook for rustic-mode."
+  (when buffer-file-name
+    (setq-local buffer-save-without-query t))
+  (add-hook 'before-save-hook 'lsp-format-buffer nil t))
+
+;; =============================================
+;; lsp mode options
+;; =============================================
+(use-package lsp-mode
+  :ensure t
+  :commands lsp
+  :custom
+  ;; what to use when checking on-save. "check" is default, I prefer clippy
+  (lsp-rust-analyzer-cargo-watch-command "clippy")
+  (lsp-eldoc-render-all t)
+  (lsp-idle-delay 0.6)
+  ;; enable / disable the hints as you prefer:
+  (lsp-inlay-hint-enable t)
+  (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
+  (lsp-rust-analyzer-display-chaining-hints t)
+  (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil)
+  (lsp-rust-analyzer-display-closure-return-type-hints t)
+  (lsp-rust-analyzer-display-parameter-hints nil)
+  (lsp-rust-analyzer-display-reborrow-hints nil)
+  :config
+  (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+
+(use-package lsp-ui
+  :ensure
+  :commands lsp-ui-mode
+  :custom
+  (lsp-ui-peek-always-show t)
+  (lsp-ui-sideline-show-hover t)
+  (lsp-ui-doc-enable nil))
 
 ;; =============================================
 ;; company options
 ;; =============================================
 (use-package company
+  :ensure t
+  :custom
+  (company-idle-delay 0.5)
   :init
   (add-hook 'after-init-hook 'global-company-mode)
-  :config
-  (setq company-minimum-prefix-length 1
-	company-idle-delay 0.1
-	company-show-numbers t
-	company-tooltip-idle-delay 0.1
-	company-tooltip-limit 20
-	company-require-match nil
-	company-frontends '(company-pseudo-tooltip-frontend
-			    company-preview-frontend
-			    company-echo-metadata-frontend)
-	company-backends '(company-capf))
-  :bind (("M-/" . company-complete)
+  :bind (:map company-mode-map
+	      ("M-/" . company-complete)
+	      ("<tab>" . tab-indent-or-complete)
+	      ("TAB" . tab-indent-or-complete)
 	 :map company-active-map
 	 ("TAB" . company-complete-common-or-cycle)
 	 ("<backtab>" .
@@ -195,12 +241,47 @@
 	    (company-complete-common-or-cycle -1)))
 	 ("C-SPC" . company-complete-common)))
 
+(defun company-yasnippet-or-completion ()
+  (interactive)
+  (or (do-yas-expand)
+      (company-complete-common)))
+
+(defun check-expansion ()
+  (save-excursion
+    (if (looking-at "\\_>") t
+      (backward-char 1)
+      (if (looking-at "\\.") t
+	(backward-char 1)
+	(if (looking-at "::" t nil))))))
+
+(defun do-yas-expand ()
+  (let ((yas/fallback-behavior 'return-nil))
+    (yas/expand)))
+
+(defun tab-indent-or-complete ()
+  (interactive)
+  (if (minibufferp)
+      (minibuffer-complete)
+    (if (or (not yas/minor-mode)
+	    (null (do-yas-expand))
+	    (if (check-expansion)
+		(company-complete-common)
+	      (indent-for-tab-command))))))
+
+;; =============================================
+;; yasnippet options
+;; =============================================
+(use-package yasnippet
+  :ensure
+  :config
+  (yas-reload-all)
+  :hook
+  '((prog-mode . yas-minor-mode)
+    (text-mode . yas-minor-mode)))
+
 ;; =============================================
 ;; python
 ;; =============================================
-(use-package python
-  :hook ((python-mode . eglot-ensure)))
-
 (use-package pipenv
   :hook
   (python-mode . pipenv-mode))
@@ -211,23 +292,18 @@
     (add-to-list 'company-backends 'company-jedi)))
 
 ;; =============================================
-;; eglot options
-;; =============================================
-(with-eval-after-load 'eglot
-  (add-to-list 'eglot-server-programs
-	       '((python-mode . ("jedi-language-server"))
-		 (rust-mode . ("rustup" "run" "stable" "rust-analyzer" :initializationOptions
-			       (:check (:command "clippy"))))
-		 ((c++-mode c++-ts-mode) . ("clangd"))
-		 ((c-mode c-ts-mode) . ("clangd"))))
-  (add-to-list 'eglot-stay-out-of 'flymake))
-
-;; =============================================
 ;; flycheck
 ;; =============================================
 (use-package flycheck
   :ensure t
   :init (global-flycheck-mode))
+
+;; =============================================
+;; powershell
+;; =============================================
+(use-package powershell
+  :hook
+  '((powershell-mode . powershell-ts-mode)))
 
 ;; ==============================================
 ;; org-mode
@@ -250,7 +326,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-  '(org-contrib org catppuccin-theme company magit rust-mode cargo)))
+   '(org-contrib org catppuccin-theme company magit rust-mode cargo)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
