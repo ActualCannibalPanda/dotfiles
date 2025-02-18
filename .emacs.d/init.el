@@ -45,12 +45,17 @@
 	      ; features
 	      flycheck
 	      rainbow-delimiters
+	      highlight-indent-guides
+	      multiple-cursors
 	      ; langs
 	      powershell
 	      cmake-ide
 	      rustic
 	      cargo
 	      pipenv
+	      clojure-mode
+	      cider
+	      inf-clojure
 	      ))))
   (dolist (package packages)
     (unless (package-installed-p package)
@@ -76,6 +81,7 @@
 (use-package use-package
   :config
   (setq use-package-always-ensure t))
+
 
 (use-package siege-mode
   :ensure quelpa
@@ -110,6 +116,23 @@
   (global-treesit-auto-mode))
 
 (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
+
+(use-package highlight-indent-guides
+  :config
+  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+  (setq highlight-indent-guides-method 'character
+	highlight-indent-guides-auto-enabled nil
+	highlight-indent-guides-auto-odd-face "darkgray"
+	highlight-indent-guides-auto-even-face "dimgray"
+	highlight-indent-guides-auto-character-face "white"))
+
+(use-package multiple-cursors
+  :config
+  (require 'multiple-cursors)
+  :bind (("C-c C-." . mc/edit-lines)
+	 ("C->" . mc/mark-next-like-this)
+	 ("C-<" . mc/mark-previous-like-this)
+	 ("C-c C-<" . mc/mark-all-like-this)))
 
 ;; =============================================
 ;; theme
@@ -313,7 +336,7 @@
 ;; =============================================
 (use-package pipenv
   :hook
-  (python-mode . pipenv-mode))
+  ((python-mode python-ts-mode) . pipenv-mode))
 
 (with-eval-after-load 'company
   (use-package company-jedi
@@ -354,7 +377,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(org-contrib org catppuccin-theme company magit rust-mode cargo)))
+   '(multiple-cursors mutiple-cursors inf-clojure cider clojure-mode highlight-indent-guides org-contrib org catppuccin-theme company magit rust-mode cargo)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
