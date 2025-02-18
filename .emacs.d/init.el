@@ -239,8 +239,16 @@
 (use-package company
   :custom
   (company-idle-delay 0.5)
+  (company-backends
+	'((company-capf :with company-yasnippet)
+	  (company-clang :with company-yasnippet)
+	  (company-files :with company-yasnippet)
+	  (company-rust :with company-yasnippet)
+	  (company-emacs-lisp :with company-yasnippet)
+	  (company-yasnippet)))
   :init
   (add-hook 'after-init-hook 'global-company-mode)
+  :config
   :bind (:map company-mode-map
 	      ("M-/" . company-complete)
 	      ("<tab>" . tab-indent-or-complete)
@@ -254,31 +262,35 @@
 	 ("C-SPC" . company-complete-common)))
 
 (defun company-yasnippet-or-completion ()
+  "Either expand a snippet or do a completion."
   (interactive)
   (or (do-yas-expand)
       (company-complete-common)))
 
 (defun check-expansion ()
+  "Check if can expand."
   (save-excursion
     (if (looking-at "\\_>") t
       (backward-char 1)
       (if (looking-at "\\.") t
 	(backward-char 1)
-	(if (looking-at "::" t nil))))))
+	(if (looking-at "::") t nil)))))
 
 (defun do-yas-expand ()
+  "Do a yasnipped expansion."
   (let ((yas/fallback-behavior 'return-nil))
     (yas/expand)))
 
 (defun tab-indent-or-complete ()
+  "Either indent or complete."
   (interactive)
   (if (minibufferp)
       (minibuffer-complete)
     (if (or (not yas/minor-mode)
-	    (null (do-yas-expand))
+	    (null (do-yas-expand)))
 	    (if (check-expansion)
 		(company-complete-common)
-	      (indent-for-tab-command))))))
+	      (indent-for-tab-command)))))
 
 ;; =============================================
 ;; yasnippet options
@@ -286,6 +298,12 @@
 (use-package yasnippet
   :config
   (yas-reload-all)
+  (setq yasnippets-dirs
+	'("~/.emacs.d/snippets"))
+  (yas-global-mode 1)
+  :bind (:map yas-keymap
+	      ("C-." . yas-next-field-or-maybe-expand)
+	      ("C-," . yas-prev))
   :hook
   '((prog-mode . yas-minor-mode)
     (text-mode . yas-minor-mode)))
