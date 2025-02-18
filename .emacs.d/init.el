@@ -109,10 +109,6 @@
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 
-(add-hook 'after-init-hook
-	  (lambda ()
-	    (setq magit-define-global-key-bindings "recommended")))
-
 (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
 
 ;; =============================================
@@ -122,6 +118,18 @@
 	  (lambda ()
 	    (setq catppuccin-flavor 'mocha)
 	    (load-theme 'catppuccin :no-confirm)))
+
+;; =============================================
+;; magit
+;; =============================================
+(use-package magit
+  :init
+  (setq magit-define-global-key-bindings "recommended")
+  :config
+  ;; This is to prevent company from overidding the TAB keybind
+  (add-hook 'magit-status-mode-hook
+	    (lambda ()
+	      (company-mode -1))))
 
 ;; =============================================
 ;; font
