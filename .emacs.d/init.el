@@ -10,6 +10,7 @@
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode)
 
+(setq use-package-always-ensure t)
 (setq package-install-upgrade-built-in t)
 (setq package-enable-at-startup nil)
 
@@ -82,7 +83,6 @@
   :hook (prog-mode . siege-mode))
 
 (use-package treesit-auto
-  :ensure quelpa
   :demand t
   :quelpa (treesit-auto :repo "renzmann/treesit-auto" :fetcher github)
   :init
@@ -161,15 +161,22 @@
   (cmake-ide-setup))
 
 ;; =============================================
+;; elisp
+;; =============================================
+(defun my/emacs-lisp-mode-hook ()
+  "My hook for elisp mode."
+  (define-key emacs-lisp-mode-map (kbd "C-S-b") 'eval-buffer))
+
+(add-hook 'emacs-lisp-mode-hook 'my/emacs-lisp-mode-hook)
+
+;; =============================================
 ;; rust
 ;; =============================================
 (use-package rust-mode
-  :ensure t
-  :config
-  (rustic-mode))
+  :hook
+  rustic-mode)
 
 (use-package rustic
-  :ensure t
   :bind (:map rustic-mode-map
 	      ("M-j" . lsp-ui-menu)
 	      ("M-?" . lsp-find-references)
@@ -194,7 +201,6 @@
 ;; lsp mode options
 ;; =============================================
 (use-package lsp-mode
-  :ensure t
   :commands lsp
   :custom
   ;; what to use when checking on-save. "check" is default, I prefer clippy
@@ -213,7 +219,6 @@
   (add-hook 'lsp-mode-hook 'lsp-ui-mode))
 
 (use-package lsp-ui
-  :ensure
   :commands lsp-ui-mode
   :custom
   (lsp-ui-peek-always-show t)
@@ -224,7 +229,6 @@
 ;; company options
 ;; =============================================
 (use-package company
-  :ensure t
   :custom
   (company-idle-delay 0.5)
   :init
@@ -272,7 +276,6 @@
 ;; yasnippet options
 ;; =============================================
 (use-package yasnippet
-  :ensure
   :config
   (yas-reload-all)
   :hook
@@ -295,7 +298,6 @@
 ;; flycheck
 ;; =============================================
 (use-package flycheck
-  :ensure t
   :init (global-flycheck-mode))
 
 ;; =============================================
