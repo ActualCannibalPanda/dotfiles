@@ -2,6 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 (require 'package)
+(require 'cl-lib)
 
 (setq inhibit-startup-screen t)
 
@@ -47,6 +48,8 @@
 	      rainbow-delimiters
 	      highlight-indent-guides
 	      multiple-cursors
+	      expand-region
+	      change-inner
 	      ; langs
 	      powershell
 	      cmake-ide
@@ -82,6 +85,16 @@
   :config
   (setq use-package-always-ensure t))
 
+(use-package expand-region
+  :config
+  (require 'expand-region)
+  (keymap-global-set "C-=" 'er/expand-region))
+
+(use-package change-inner
+  :config
+  (require 'change-inner)
+  (keymap-global-set "M-i" 'change-inner)
+  (keymap-global-set "M-o" 'change-outer))
 
 (use-package siege-mode
   :ensure quelpa
@@ -181,6 +194,23 @@
   (open-line 1)
   (forward-line 1))
 
+(defun kill-other-buffers ()
+  "Kill all other buffers."
+  (interactive)
+  (mapc 'kill-buffer
+	(delq (current-buffer)
+	      (remove-if-not 'buffer-file-name (buffer-list)))))
+
+(defadvice ibuffer
+    (around ibuffer-point-to-most-recent) ()
+    "Open ibuffer with cursor pointed to most recent buffer name."
+    (let ((recent-buffer-name (buffer-name)))
+      ad-do-it
+      (ibuffer-jump-to-buffer recent-buffer-name)))
+(ad-activate 'ibuffer)
+
+(keymap-global-set "C-x C-b" 'ibuffer)
+(keymap-global-set "C-x M-b" 'kill-other-buffers)
 (keymap-global-set "M-n" 'insert-line-below)
 (keymap-global-set "M-p" 'insert-line-above)
 
@@ -355,6 +385,17 @@
 (use-package powershell
   :hook
   '((powershell-mode . powershell-ts-mode)))
+
+;; =============================================
+;; clojure
+;; =============================================
+(use-package clojure-mode
+  :hook
+  '(((clojure-mode clojurescript-mode clojuer-c-mode) . lsp)
+    ((clojure-mode clojurescript-mode clojuer-c-mode) .
+     (lambda ()
+       (setq-local lsp-enable-completion-at-point nil
+		   lsp-enable-indentation nil)))))
 
 ;; ==============================================
 ;; org-mode
