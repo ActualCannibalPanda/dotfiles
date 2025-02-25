@@ -1,89 +1,56 @@
 ;;; init --- Emacs initialisation -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;; Code:
-(require 'package)
 (require 'cl-lib)
 
-(setq inhibit-startup-screen t)
+(defvar elpaca-installer-version 0.10)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil :depth 1 :inherit ignore
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (<= emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let* ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                  ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                  ,@(when-let* ((depth (plist-get order :depth)))
+                                                      (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                  ,(plist-get order :repo) ,repo))))
+                  ((zerop (call-process "git" nil buffer t "checkout"
+                                        (or (plist-get order :ref) "--"))))
+                  (emacs (concat invocation-directory invocation-name))
+                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                  ((require 'elpaca))
+                  ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (load "./elpaca-autoloads")))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
+(elpaca-no-symlink-mode)
 
-(setq load-prefer-new t)
+(elpaca elpaca-use-package
+  (elpaca-use-package-mode))
+(setq use-package-always-ensure t)
+
+(elpaca-wait)
 
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode)
-
-(setq use-package-always-ensure t)
-(setq package-install-upgrade-built-in t)
-(setq package-enable-at-startup nil)
-
-(setq package-archives
-      '(("ELPA"      . "http://tromey.com/elpa/")
-	("gnu"       . "http://elpa.gnu.org/packages/")
-	("melpa"     . "https://melpa.org/packages/")
-	("org"       . "https://orgmode.org/elpa/")
-	("gnu-devel" . "https://elpa.gnu.org/devel/")
-	("nongnu"    . "https://elpa.nongnu.org/nongnu/")))
-
-(package-initialize)
-		     
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-
-(let ((packages
-      (quote (; theme
-	      catppuccin-theme
-	      ; font
-  	      fira-code-mode
-	      ; completion
-	      company
-	      company-jedi
-	      yasnippet
-	      ; lsp
-	      lsp-mode
-	      lsp-ui
-	      ; vcs
-	      magit
-	      ; features
-	      flycheck
-	      rainbow-delimiters
-	      highlight-indent-guides
-	      multiple-cursors
-	      expand-region
-	      change-inner
-	      ; langs
-	      powershell
-	      cmake-ide
-	      rustic
-	      cargo
-	      pipenv
-	      clojure-mode
-	      cider
-	      inf-clojure
-	      ))))
-  (dolist (package packages)
-    (unless (package-installed-p package)
-      (package-install package))))
-
-(defvar quelpa-update-melpa-p nil)
-(defvar quelpa-checkout-melpa-p nil)
-
-(unless (package-installed-p 'quelpa)
-  (with-temp-buffer
-    (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
-    (eval-buffer)
-    (quelpa-self-upgrade)))
-
-(quelpa
- '(quelpa-use-package
-   :fetcher git
-   :url "https://github.com/quelpa/quelpa-use-package.git"))
-(require 'quelpa-use-package)
-
-(eval-when-compile (require 'use-package))
-
-(use-package use-package
-  :config
-  (setq use-package-always-ensure t))
 
 (use-package expand-region
   :config
@@ -97,13 +64,12 @@
   (keymap-global-set "M-o" 'change-outer))
 
 (use-package siege-mode
-  :ensure quelpa
-  :quelpa (siege-mode :repo "tslilc/siege-mode" :fetcher github)
+  :ensure (siege-mode :fetcher github :repo "tslilc/siege-mode")
   :hook (prog-mode . siege-mode))
 
 (use-package treesit-auto
   :demand t
-  :quelpa (treesit-auto :repo "renzmann/treesit-auto" :fetcher github)
+  :ensure (treesit-auto :repo "renzmann/treesit-auto" :fetcher github)
   :init
   (setq treesit-language-source-alist
 	'((bash "https://github.com/tree-sitter/tree-sitter-bash")
@@ -128,7 +94,8 @@
   (treesit-auto-add-to-auto-mode-alist 'all)
   (global-treesit-auto-mode))
 
-(add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
 
 (use-package highlight-indent-guides
   :config
@@ -147,18 +114,25 @@
 	 ("C-<" . mc/mark-previous-like-this)
 	 ("C-c C-<" . mc/mark-all-like-this)))
 
+(use-package paredit
+  :hook
+  ((emacs-lisp-mode . enable-paredit-mode)
+   ((clojure-mode clojure-ts-mode) . enable-paredit-mode)))
+
 ;; =============================================
 ;; theme
 ;; =============================================
-(add-hook 'after-init-hook
-	  (lambda ()
-	    (setq catppuccin-flavor 'mocha)
-	    (load-theme 'catppuccin :no-confirm)))
+(use-package catppuccin-theme
+  :config
+  (setq catppuccin-flavor 'mocha)
+  (load-theme 'catppuccin :no-confirm))
 
 ;; =============================================
 ;; magit
 ;; =============================================
+(use-package transient)
 (use-package magit
+  :after transient
   :init
   (setq magit-define-global-key-bindings "recommended")
   :config
@@ -400,25 +374,32 @@
 ;; ==============================================
 ;; org-mode
 ;; ==============================================
-(require 'org)
-(keymap-global-set "C-c l"  'org-store-link)
-(keymap-global-set "C-c a" 'org-agenda)
-(setq org-log-done t)
-(setq org-src-tab-acts-natively t)
-(setq org-src-preserve-indentation t)
-(setq org-todo-keyword-faces
-      '(("TODO" . org-warning)
-       ("STARTED" . "yellow")
-       ("CANCELED" . (:foreground "blue" :weight bold))
-       ("DONE" . "green")))
+(use-package org
+  :config
+  (require 'org)
+  (keymap-global-set "C-c l"  'org-store-link)
+  (keymap-global-set "C-c a" 'org-agenda)
+  (setq org-log-done t)
+  (setq org-src-tab-acts-natively t)
+  (setq org-src-preserve-indentation t)
+  (setq org-todo-keyword-faces
+	'(("TODO" . org-warning)
+	  ("STARTED" . "yellow")
+	  ("CANCELED" . (:foreground "blue" :weight bold))
+	  ("DONE" . "green"))))
+
+(use-package org-contrib
+  :after org)
+
+(use-package inf-clojure)
+(use-package cider)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(multiple-cursors mutiple-cursors inf-clojure cider clojure-mode highlight-indent-guides org-contrib org catppuccin-theme company magit rust-mode cargo)))
+)
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
