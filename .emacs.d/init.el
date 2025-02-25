@@ -3,6 +3,8 @@
 ;;; Code:
 (require 'cl-lib)
 
+(setq inhibit-startup-screen t)
+
 (defvar elpaca-installer-version 0.10)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
@@ -114,10 +116,10 @@
 	 ("C-<" . mc/mark-previous-like-this)
 	 ("C-c C-<" . mc/mark-all-like-this)))
 
-(use-package paredit
-  :hook
-  ((emacs-lisp-mode . enable-paredit-mode)
-   ((clojure-mode clojure-ts-mode) . enable-paredit-mode)))
+(use-package smartparens
+  :hook (prog-mode text-mode markdown-mode)
+  :config
+  (require 'smartparens-config))
 
 ;; =============================================
 ;; theme
@@ -135,11 +137,28 @@
   :after transient
   :init
   (setq magit-define-global-key-bindings "recommended")
+  :init
+  (use-package with-editor)
+
+  (defadvice magit-status (around magit-fullscreen activate)
+    (window-configuration-to-register :magit-fullscreen)
+    ad-do-it
+    (delete-other-windows))
+  (defadvice magit-quit-window (after magit-restore-screen activate)
+    (jump-to-register :magit-fullscreen))
+  
   :config
   ;; This is to prevent company from overidding the TAB keybind
   (add-hook 'magit-status-mode-hook
 	    (lambda ()
-	      (company-mode -1))))
+	      (company-mode -1)))
+  
+  (remove-hook 'magit-status-sections-hook 'magit-insert-tags-header)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-status-headers)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-pushremote)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-pushremote)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-upstream)
+  (remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-upstream-or-recent))
 
 ;; =============================================
 ;; font
@@ -211,6 +230,12 @@
   :hook
   rustic-mode)
 
+(defun my/rustic-mode-hook ()
+  "A hook for rustic-mode."
+  (when buffer-file-name
+    (setq-local buffer-save-without-query t))
+  (add-hook 'before-save-hook 'lsp-format-buffer nil t))
+
 (use-package rustic
   :bind (:map rustic-mode-map
 	      ("M-j" . lsp-ui-menu)
@@ -225,12 +250,6 @@
   (setq rustic-format-on-save t)
   :hook
   (add-hook 'rustic-mode-hook 'my/rustic-mode-hook))
-
-(defun my/rustic-mode-hook ()
-  "A hook for rustic-mode."
-  (when buffer-file-name
-    (setq-local buffer-save-without-query t))
-  (add-hook 'before-save-hook 'lsp-format-buffer nil t))
 
 ;; =============================================
 ;; lsp mode options
