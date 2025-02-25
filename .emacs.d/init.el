@@ -136,17 +136,9 @@
 (use-package magit
   :after transient
   :init
-  (setq magit-define-global-key-bindings "recommended")
-  :init
+  (setq magit-define-global-key-bindings "default")
   (use-package with-editor)
 
-  (defadvice magit-status (around magit-fullscreen activate)
-    (window-configuration-to-register :magit-fullscreen)
-    ad-do-it
-    (delete-other-windows))
-  (defadvice magit-quit-window (after magit-restore-screen activate)
-    (jump-to-register :magit-fullscreen))
-  
   :config
   ;; This is to prevent company from overidding the TAB keybind
   (add-hook 'magit-status-mode-hook
