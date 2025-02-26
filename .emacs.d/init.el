@@ -349,14 +349,24 @@
 ;; =============================================
 ;; python
 ;; =============================================
-(use-package pipenv
-  :hook
-  ((python-mode python-ts-mode) . pipenv-mode))
+(use-package pipenv :hook elpy-mode)
 
-(with-eval-after-load 'company
-  (use-package company-jedi
-    :config
-    (add-to-list 'company-backends 'company-jedi)))
+(use-package elpy
+  :hook
+  (((python-mode python-ts-mode) .
+    (lambda ()
+      (elpy-enable)
+      (elpy-mode)
+      (add-to-list 'company-backends 'elpy-company-backend)
+      (setq-local lsp-enable-completion-at-point nil
+		  lsp-enable-indentation nil))))
+  (elpy-mode . lsp))
+  
+
+;(with-eval-after-load 'company
+;  (use-package company-jedi
+;    :config
+;    (add-to-list 'company-backends 'company-jedi)))
 
 ;; =============================================
 ;; flycheck
