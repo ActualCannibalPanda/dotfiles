@@ -282,7 +282,6 @@
 	  (company-clang :with company-yasnippet)
 	  (company-files :with company-yasnippet)
 	  (company-rust :with company-yasnippet)
-	  (company-emacs-lisp :with company-yasnippet)
 	  (company-yasnippet)))
   :init
   (add-hook 'after-init-hook 'global-company-mode)
@@ -363,10 +362,10 @@
   (elpy-mode . lsp))
   
 
-;(with-eval-after-load 'company
-;  (use-package company-jedi
-;    :config
-;    (add-to-list 'company-backends 'company-jedi)))
+(with-eval-after-load 'company
+  (use-package company-jedi
+    :config
+    (add-to-list 'company-backends 'company-jedi)))
 
 ;; =============================================
 ;; flycheck
