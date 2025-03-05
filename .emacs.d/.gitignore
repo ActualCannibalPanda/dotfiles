@@ -9,3 +9,4 @@ tree-sitter/
 .cache/
 url/
 elpaca/
+eshell/

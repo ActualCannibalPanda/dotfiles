@@ -3,6 +3,9 @@
 ;;; Code:
 (require 'cl-lib)
 
+(setq gc-cons-threshold 100000000)
+(setq read-process-output-max (* 1024 1024))
+
 (setq inhibit-startup-screen t)
 
 (defvar elpaca-installer-version 0.10)
@@ -137,7 +140,6 @@
   :after transient
   :init
   (setq magit-define-global-key-bindings "default")
-  (use-package with-editor)
 
   :config
   ;; This is to prevent company from overidding the TAB keybind
@@ -246,12 +248,46 @@
 ;; =============================================
 ;; lsp mode options
 ;; =============================================
+
+(with-eval-after-load 'lsp-mode
+  (defun lsp-booster--advice-json-parse (old-fn &rest args)
+    "Try to parse bytecode instead of json."
+    (or
+     (when (equal (following-char) ?#)
+       (let ((bytecode (read (current-buffer))))
+	 (when (byte-code-function-p bytecode)
+           (funcall bytecode))))
+     (apply old-fn args)))
+  (advice-add (if (progn (require 'json)
+			 (fboundp 'json-parse-buffer))
+                  'json-parse-buffer
+		'json-read)
+              :around
+              #'lsp-booster--advice-json-parse)
+  
+  (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+    "Prepend emacs-lsp-booster command to lsp CMD."
+    (let ((orig-result (funcall old-fn cmd test?)))
+      (if (and (not test?)                             ;; for check lsp-server-present?
+               (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+               lsp-use-plists
+               (not (functionp 'json-rpc-connection))  ;; native json-rpc
+               (executable-find "emacs-lsp-booster"))
+          (progn
+            (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+              (setcar orig-result command-from-exec-path))
+            (message "Using emacs-lsp-booster for %s!" orig-result)
+            (cons "emacs-lsp-booster" orig-result))
+	orig-result)))
+  (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command))
+
 (use-package lsp-mode
   :commands lsp
   :custom
   ;; what to use when checking on-save. "check" is default, I prefer clippy
   (lsp-rust-analyzer-cargo-watch-command "clippy")
   (lsp-eldoc-render-all t)
+  (lsp-ui-doc-enable t)
   (lsp-idle-delay 0.6)
   ;; enable / disable the hints as you prefer:
   (lsp-inlay-hint-enable t)
@@ -261,15 +297,19 @@
   (lsp-rust-analyzer-display-closure-return-type-hints t)
   (lsp-rust-analyzer-display-parameter-hints nil)
   (lsp-rust-analyzer-display-reborrow-hints nil)
-  :config
-  (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+
+  :hook
+  (prog-mode . lsp-deferred))
 
 (use-package lsp-ui
   :commands lsp-ui-mode
   :custom
   (lsp-ui-peek-always-show t)
   (lsp-ui-sideline-show-hover t)
-  (lsp-ui-doc-enable nil))
+  (custom-set-faces '(markdown-code-face ((t (:inherit default))))))
+
+(use-package lsp-pyright
+  :after lsp-mode)
 
 ;; =============================================
 ;; company options
@@ -281,8 +321,7 @@
 	'((company-capf :with company-yasnippet)
 	  (company-clang :with company-yasnippet)
 	  (company-files :with company-yasnippet)
-	  (company-rust :with company-yasnippet)
-	  (company-yasnippet)))
+          (company-yasnippet)))
   :init
   (add-hook 'after-init-hook 'global-company-mode)
   :config
@@ -355,17 +394,12 @@
   (((python-mode python-ts-mode) .
     (lambda ()
       (elpy-enable)
-      (elpy-mode)
-      (add-to-list 'company-backends 'elpy-company-backend)
-      (setq-local lsp-enable-completion-at-point nil
-		  lsp-enable-indentation nil))))
-  (elpy-mode . lsp))
-  
+      (elpy-mode)))))
 
-(with-eval-after-load 'company
-  (use-package company-jedi
-    :config
-    (add-to-list 'company-backends 'company-jedi)))
+(use-package company-jedi
+  :after company
+  :config
+  (add-to-list 'company-backends 'company-jedi))
 
 ;; =============================================
 ;; flycheck
