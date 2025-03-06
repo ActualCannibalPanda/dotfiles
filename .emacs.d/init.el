@@ -52,8 +52,6 @@
   (elpaca-use-package-mode))
 (setq use-package-always-ensure t)
 
-(elpaca-wait)
-
 (setq display-line-numbers-type 'relative)
 (global-display-line-numbers-mode)
 
@@ -248,7 +246,6 @@
 ;; =============================================
 ;; lsp mode options
 ;; =============================================
-
 (with-eval-after-load 'lsp-mode
   (defun lsp-booster--advice-json-parse (old-fn &rest args)
     "Try to parse bytecode instead of json."
@@ -286,8 +283,6 @@
   :custom
   ;; what to use when checking on-save. "check" is default, I prefer clippy
   (lsp-rust-analyzer-cargo-watch-command "clippy")
-  (lsp-eldoc-render-all t)
-  (lsp-ui-doc-enable t)
   (lsp-idle-delay 0.6)
   ;; enable / disable the hints as you prefer:
   (lsp-inlay-hint-enable t)
@@ -305,7 +300,11 @@
   :commands lsp-ui-mode
   :custom
   (lsp-ui-peek-always-show t)
-  (lsp-ui-sideline-show-hover t)
+  (lsp-ui-doc-enable t)
+  (lsp-ui-doc-position 'top)
+  (lsp-ui-doc-side 'right)
+  (lsp-ui-doc-delay 0.7)
+  (lsp-ui-doc-show-with-cursor t)
   (custom-set-faces '(markdown-code-face ((t (:inherit default))))))
 
 (use-package lsp-pyright
