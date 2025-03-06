@@ -386,9 +386,11 @@
 ;; =============================================
 ;; python
 ;; =============================================
-(use-package pipenv :hook elpy-mode)
-
 (use-package elpy
+  :bind (:map elpy-mode-map
+	      ("C-c C-b" . elpy-shell-send-buffer)
+	      ("C-c C-d" . elpy-shell-send-defun)
+	      ("C-c C-f" . elpy-shell-send-file))
   :hook
   (((python-mode python-ts-mode) .
     (lambda ()
