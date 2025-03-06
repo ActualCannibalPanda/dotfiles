@@ -378,7 +378,7 @@
   (yas-global-mode 1)
   :bind (:map yas-keymap
 	      ("C-." . yas-next-field-or-maybe-expand)
-	      ("C-," . yas-prev))
+	      ("C-," . yas-prev-field))
   :hook
   '((prog-mode . yas-minor-mode)
     (text-mode . yas-minor-mode)))
