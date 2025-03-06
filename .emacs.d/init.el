@@ -456,12 +456,17 @@
 (use-package vundo)
 
 (use-package helm
+  :after async
   :config
   (keymap-global-set "M-x" 'helm-M-x))
 
-(use-package emacs-async
-  :host github
-  :repo "jwiegley/emacs-async"
+(use-package helm-lsp
+  :after '(lsp-mode helm)
+  :config
+  (define-key lsp-mode-map [remap xref-find-apropos] #'helm-lsp-workspace-symbol))
+
+(use-package async
+  :ensure (:host github :repo "jwiegley/emacs-async" :main "async.el")
   :config
   (dired-async-mode 1))
 
