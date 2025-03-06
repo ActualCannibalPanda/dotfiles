@@ -10,3 +10,5 @@ tree-sitter/
 url/
 elpaca/
 eshell/
+.mc-shell
+.mc-lists.el
