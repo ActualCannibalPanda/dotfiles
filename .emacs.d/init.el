@@ -455,6 +455,16 @@
 
 (use-package vundo)
 
+(use-package helm
+  :config
+  (keymap-global-set "M-x" 'helm-M-x))
+
+(use-package emacs-async
+  :host github
+  :repo "jwiegley/emacs-async"
+  :config
+  (dired-async-mode 1))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
