@@ -92,6 +92,7 @@
 	  (python "https://github.com/tree-sitter/tree-sitter-python")
 	  (rust "https://github.com/tree-sitter/tree-sitter-rust")
 	  (toml "https://github.com/tree-sitter/tree-sitter-toml")
+	  (odin "https://github.com/ap29600/tree-sitter-odin")
 	  (powershell "https://github.com/airbus-cert/tree-sitter-powershell.git")))
   :config
   (treesit-auto-add-to-auto-mode-alist 'all)
@@ -382,6 +383,12 @@
   :hook
   '((prog-mode . yas-minor-mode)
     (text-mode . yas-minor-mode)))
+
+;; =============================================
+;; zig
+;; =============================================
+(use-package reformatter)
+(use-package zig-mode)
 
 ;; =============================================
 ;; python
