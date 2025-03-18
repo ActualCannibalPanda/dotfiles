@@ -17,8 +17,7 @@ Tangling this file creates an Elisp file, =~/.emacs.d/lisp/init.el=.
 #+end_src
 
 #+begin_src emacs-lisp :lexical t
-(setq package-enable-at-startup nil)
-(setq inhibit-default-init nil)
+(setenv "LSP_USE_PLISTS" "true")
 #+end_src
 
 *** provide early-init
@@ -44,33 +43,6 @@ This function displays how long emacs took to start
 		     (time-subtract (current-time) before-init-time)))
 	    gcs-done)))
 #+end_src
-
-** Quela
-#+begin_quote
-Quela is used for github packages only so we turn off melpa update and checkout.
-
-https://github.com/quelpa/quelpa
-#+end_quote
-
-*** Installer
-#+begin_src emacs-lisp :lexical t
-(setq quelpa-update-melpa-p nil)
-(setq quelpa-checkout-melpa-p nil)
-
-(unless (package-installed-p 'quelpa)
-  (with-temp-buffer
-    (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
-    (eval-buffer)
-    (quelpa-self-upgrade)))
-
-(quelpa
- '(quelpa-use-package
-   :fetcher git
-   :url "https://github.com/quelpa/quelpa-use-package.git"))
-(require 'quelpa-use-package)
-#+end_src
-
-***
 
 ** Elpaca
 #+begin_quote
@@ -121,6 +93,8 @@ https://github.com/progfolio/elpaca
 (elpaca `(,@elpaca-order))
 #+end_src
 
+* Elpaca use-package integration
+
 #+begin_src emacs-lisp :lexical t
 (elpaca elpaca-use-package
   (require 'elpaca-use-package)
@@ -128,11 +102,119 @@ https://github.com/progfolio/elpaca
   (setq use-package-always-ensure t))
 #+end_src
 
+*** Misc. Settings
+
+#+begin_src emacs-lisp :lexical t
+(setq display-line-numbers-type 'relative)
+(global-display-line-numbers-mode)
+#+end_src
+
 * Packages
 :PROPERTIES:
 :VISIBILITY: children
 :CUSTOM_ID: init-packages
 :END:
+** Misc. Editing Packages
+#+begin_src emacs-lisp :lexical t
+(use-package expand-region
+  :config
+  (require 'expand-region)
+  (keymap-global-set "C-=" 'er/expand-region))
+
+(use-package change-inner
+  :config
+  (require 'change-inner)
+  (keymap-global-set "M-i" 'change-inner)
+  (keymap-global-set "M-o" 'change-outer))
+
+(use-package siege-mode
+  :ensure (siege-mode :fetcher github :repo "tslilc/siege-mode")
+  :hook (prog-mode . siege-mode))
+
+(use-package multiple-cursors
+  :config
+  (require 'multiple-cursors)
+  :bind (("C-c C-." . mc/edit-lines)
+	 ("C->" . mc/mark-next-like-this)
+	 ("C-<" . mc/mark-previous-like-this)
+	 ("C-c C-<" . mc/mark-all-like-this)))
+
+(use-package smartparens
+  :hook (prog-mode text-mode markdown-mode)
+  :config
+  (require 'smartparens-config))
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+(use-package highlight-indent-guides
+  :config
+  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+  (setq highlight-indent-guides-method 'character
+	highlight-indent-guides-auto-enabled nil
+	highlight-indent-guides-auto-odd-face "darkgray"
+	highlight-indent-guides-auto-even-face "dimgray"
+	highlight-indent-guides-auto-character-face "white"))
+
+(defun insert-line-below ()
+  "Insert an empty line below the current line."
+  (interactive)
+  (end-of-line)
+  (open-line 1)
+  (forward-line 1))
+
+(defun insert-line-above ()
+  "Insert an empty line above the current line."
+  (interactive)
+  (forward-line -1)
+  (end-of-line)
+  (open-line 1)
+  (forward-line 1))
+
+(defun kill-other-buffers ()
+  "Kill all other buffers."
+  (interactive)
+  (mapc 'kill-buffer
+	(delq (current-buffer)
+	      (remove-if-not 'buffer-file-name (buffer-list)))))
+
+(defadvice ibuffer
+    (around ibuffer-point-to-most-recent) ()
+    "Open ibuffer with cursor pointed to most recent buffer name."
+    (let ((recent-buffer-name (buffer-name)))
+      ad-do-it
+      (ibuffer-jump-to-buffer recent-buffer-name)))
+(ad-activate 'ibuffer)
+
+(keymap-global-set "C-x C-b" 'ibuffer)
+(keymap-global-set "C-x M-b" 'kill-other-buffers)
+(keymap-global-set "M-n" 'insert-line-below)
+(keymap-global-set "M-p" 'insert-line-above)
+
+(use-package async
+  :ensure (:host github :repo "jwiegley/emacs-async" :main "async.el")
+  :config
+  (dired-async-mode 1))
+
+(use-package dired
+  :ensure nil
+  :bind (:map dired-mode-map
+	      ("-" . dired-up-directory)))
+
+(use-package hideshow
+  :ensure nil
+  :bind (("C-<tab>" . hs-toggle-hiding))
+  :hook (prog-mode . hs-minor-mode))
+
+(use-package undo-fu
+  :config
+  (keymap-global-unset "C-z")
+  (keymap-global-set "C-z" 'undo-fu-only-undo)
+  (keymap-global-set "C-S-z" 'undo-fu-only-redo))
+
+(use-package vundo)
+#+end_src
+
 ** catppuccin theme
 #+begin_src emacs-lisp :lexical t
 (use-package catppuccin-theme
@@ -143,19 +225,75 @@ https://github.com/progfolio/elpaca
 ** fira code mode
 #+begin_src emacs-lisp :lexical t
 (use-package fira-code-mode
+  :custom
+  (fira-code-mode-disabled-ligatures '("x" "[]"))
   :config
   (global-fira-code-mode)
   (fira-code-mode-set-font)
   :hook prog-mode)
 #+end_src
 
+** treesit-auto
+#+begin_src emacs-lisp :lexical t
+(use-package treesit-auto
+  :demand t
+  :ensure (treesit-auto :repo "renzmann/treesit-auto" :fetcher github)
+  :init
+  (setq treesit-language-source-alist
+	'((bash "https://github.com/tree-sitter/tree-sitter-bash")
+	  (c "https://github.com/tree-sitter/tree-sitter-c")
+	  (cmake "https://github.com/uyha/tree-sitter-cmake")
+	  (common-lisp "https://github.com/theHamsta/tree-sitter-commonlisp")
+	  (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+	  (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+	  (go "https://github.com/tree-sitter/tree-sitter-go")
+	  (go-mod "https://github.com/camdencheek/tree-sitter-go-mod")
+	  (html "https://github.com/tree-sitter/tree-sitter-html")
+	  (js . ("https://github.com/tree-sitter/tree-sitter-javascript" "master" "src"))
+	  (json "https://github.com/tree-sitter/tree-sitter-json")
+	  (lua "https://github.com/Azganoth/tree-sitter-lua")
+	  (make "https://github.com/alemuller/tree-sitter-make")
+	  (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+	  (python "https://github.com/tree-sitter/tree-sitter-python")
+	  (rust "https://github.com/tree-sitter/tree-sitter-rust")
+	  (toml "https://github.com/tree-sitter/tree-sitter-toml")
+	  (odin "https://github.com/ap29600/tree-sitter-odin")
+	  (powershell "https://github.com/airbus-cert/tree-sitter-powershell.git")))
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+#+end_src
+
 ** magit
 #+begin_src emacs-lisp :lexical t
+(use-package transient)
+
+(defun exit-magit ()
+  "Force magit to kill buffer"
+  (interactive)
+  (magit-kill-this-buffer)
+  (delete-window))
+
 (use-package magit
-  :hook
-  (after-init .
-	      (lambda ()
-		(setq magit-define-global-key-bindings "recommended"))))
+  :after transient
+  :init
+  (setq magit-define-global-key-bindings "default")
+
+  :bind (:map magit-mode-map
+	      ("C-c x" . exit-magit))
+
+  :config
+  ;; This is to prevent company from overidding the TAB keybind
+  (add-hook 'magit-status-mode-hook
+	    (lambda ()
+	      (company-mode -1))))
+#+end_src
+
+** cmake-ide
+#+begin_src emacs-lisp :lexical t
+(use-package cmake-ide
+  :config
+  (cmake-ide-setup))
 #+end_src
 
 ** company
