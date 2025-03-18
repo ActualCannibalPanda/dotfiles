@@ -209,8 +209,9 @@
 ;; c
 ;; =============================================
 (use-package cmake-ide
-  :config
-  (cmake-ide-setup))
+  :hook
+  ((cc-mode . cmake-ide-setup)
+   (cc-mode . lsp-deferred)))
 
 ;; =============================================
 ;; elisp
@@ -247,7 +248,7 @@
   :config
   (setq rustic-format-on-save t)
   :hook
-  (add-hook 'rustic-mode-hook 'my/rustic-mode-hook))
+  (rustic-mode . my/rustic-mode-hook))
 
 ;; =============================================
 ;; lsp mode options
@@ -298,9 +299,6 @@
   (lsp-rust-analyzer-display-closure-return-type-hints t)
   (lsp-rust-analyzer-display-parameter-hints nil)
   (lsp-rust-analyzer-display-reborrow-hints nil)
-
-  :hook
-  (prog-mode . lsp-deferred))
 
 (use-package lsp-ui
   :commands lsp-ui-mode
@@ -415,7 +413,8 @@
   (((python-mode python-ts-mode) .
     (lambda ()
       (elpy-enable)
-      (elpy-mode)))))
+      (elpy-mode)
+      (lsp-deferred)))))
 
 (use-package company-jedi
   :after company
@@ -440,7 +439,7 @@
 ;; =============================================
 (use-package clojure-mode
   :hook
-  '(((clojure-mode clojurescript-mode clojuer-c-mode) . lsp)
+  '(((clojure-mode clojurescript-mode clojuer-c-mode) . lsp-deferred)
     ((clojure-mode clojurescript-mode clojuer-c-mode) .
      (lambda ()
        (setq-local lsp-enable-completion-at-point nil
