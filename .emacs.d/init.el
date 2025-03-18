@@ -135,24 +135,27 @@
 ;; magit
 ;; =============================================
 (use-package transient)
+
+(defun exit-magit ()
+  "Force magit to kill buffer"
+  (interactive)
+  (magit-kill-this-buffer)
+  (delete-window))
+
 (use-package magit
   :after transient
   :init
   (setq magit-define-global-key-bindings "default")
 
+  :bind (:map magit-mode-map
+	      ("C-c x" . exit-magit))
+
   :config
   ;; This is to prevent company from overidding the TAB keybind
   (add-hook 'magit-status-mode-hook
 	    (lambda ()
-	      (company-mode -1)))
+	      (company-mode -1))))
   
-  (remove-hook 'magit-status-sections-hook 'magit-insert-tags-header)
-  (remove-hook 'magit-status-sections-hook 'magit-insert-status-headers)
-  (remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-pushremote)
-  (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-pushremote)
-  (remove-hook 'magit-status-sections-hook 'magit-insert-unpulled-from-upstream)
-  (remove-hook 'magit-status-sections-hook 'magit-insert-unpushed-to-upstream-or-recent))
-
 ;; =============================================
 ;; font
 ;; =============================================
