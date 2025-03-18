@@ -396,10 +396,18 @@
 ;; python
 ;; =============================================
 (use-package elpy
-  :bind (:map elpy-mode-map
-	      ("C-c C-b" . elpy-shell-send-buffer)
-	      ("C-c C-d" . elpy-shell-send-defun)
-	      ("C-c C-f" . elpy-shell-send-file))
+  :bind (("C-c C-b" . elpy-shell-send-buffer)
+	 ("C-c g C-b" . elpy-shell-send-buffer-and-go)
+	 ("C-c C-d" . elpy-shell-send-defun)
+	 ("C-c s C-d" . elpy-shell-send-defun-and-step)
+	 ("C-c g C-d" . elpy-shell-send-defun-and-go)
+	 ("C-c C-c" . elpy-shell-send-declass)
+	 ("C-c s C-c" . elpy-shell-send-declass-and-step)
+	 ("C-c g C-c" . elpy-shell-send-declass-and-go)
+	 ("C-c C-f" . elpy-shell-send-file)
+	 ("C-c g C-f" . elpy-shell-send-file-and-go))
+  :custom
+  (setq python-indent-offset 4)
   :hook
   (((python-mode python-ts-mode) .
     (lambda ()
