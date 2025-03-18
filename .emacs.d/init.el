@@ -157,6 +157,8 @@
 ;; font
 ;; =============================================
 (use-package fira-code-mode
+  :custom
+  (fira-code-mode-disabled-ligatures '("x" "[]"))
   :config
   (global-fira-code-mode)
   (fira-code-mode-set-font)
