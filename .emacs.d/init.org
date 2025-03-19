@@ -1,7 +1,7 @@
 ;-*- eval: (load-file "./init-def.el"); -*-
 #+title: My Emacs Configuration
 #+options: ^:{} html-postamble: nil
-#+property: header-args :mkdirp yes :tangle yes :tanglemdoe #o444 :results silent :nowwb yes
+#+property: header-args :mkdirp yes :tangle yes :tanglemode #o444 :results silent
 #+startup: no-indent
 * An Explanation
 This is a literate configuration for =Emacs=.
@@ -29,6 +29,20 @@ Tangling this file creates an Elisp file, =~/.emacs.d/lisp/init.el=.
 The following line turns on lexical binding for performace reasons.
 #+begin_src emacs-lsp :lexical t
 ;; -*- lexical-binding: t -*-
+#+end_src
+
+*** Misc. Settings
+
+#+begin_src emacs-lisp :lexical t
+(require 'cl-lib)
+
+(setq gc-cons-threshold 100000000)
+(setq read-process-output-max (* 1024 1024))
+
+(setq inhibit-startup-screen t)
+
+(setq display-line-numbers-type 'relative)
+(global-display-line-numbers-mode)
 #+end_src
 
 ** profiling
@@ -102,13 +116,6 @@ https://github.com/progfolio/elpaca
   (setq use-package-always-ensure t))
 #+end_src
 
-*** Misc. Settings
-
-#+begin_src emacs-lisp :lexical t
-(setq display-line-numbers-type 'relative)
-(global-display-line-numbers-mode)
-#+end_src
-
 * Packages
 :PROPERTIES:
 :VISIBILITY: children
@@ -161,7 +168,8 @@ https://github.com/progfolio/elpaca
   (interactive)
   (end-of-line)
   (open-line 1)
-  (forward-line 1))
+  (forward-line 1)
+  (indent-for-tab-command))
 
 (defun insert-line-above ()
   "Insert an empty line above the current line."
@@ -169,7 +177,8 @@ https://github.com/progfolio/elpaca
   (forward-line -1)
   (end-of-line)
   (open-line 1)
-  (forward-line 1))
+  (forward-line 1)
+  (indent-for-tab-command))
 
 (defun kill-other-buffers ()
   "Kill all other buffers."
@@ -299,33 +308,119 @@ https://github.com/progfolio/elpaca
 ** company
 #+begin_src emacs-lisp :lexical t
 (use-package company
-  :after lsp
-  :hook (lsp-mode . company-mode)
+  :custom
+  (company-idle-delay 0.5)
+  (company-backends
+	'((company-capf :with company-yasnippet)
+	  (company-clang :with company-yasnippet)
+	  (company-files :with company-yasnippet)
+          (company-yasnippet)))
+  :init
+  (add-hook 'after-init-hook 'global-company-mode)
   :config
-  (setq lsp-completion-provider :capf))
+  :bind (:map company-mode-map
+	      ("M-/" . company-complete)
+	      ("<tab>" . tab-indent-or-complete)
+	      ("TAB" . tab-indent-or-complete)
+	 :map company-active-map
+	 ("TAB" . company-complete-common-or-cycle)
+	 ("<backtab>" .
+	  (lambda ()
+	    (interactive)
+	    (company-complete-common-or-cycle -1)))
+	 ("C-SPC" . company-complete-common)))
+
+(defun company-yasnippet-or-completion ()
+  "Either expand a snippet or do a completion."
+  (interactive)
+  (or (do-yas-expand)
+      (company-complete-common)))
+
+(defun check-expansion ()
+  "Check if can expand."
+  (save-excursion
+    (if (looking-at "\\_>") t
+      (backward-char 1)
+      (if (looking-at "\\.") t
+	(backward-char 1)
+	(if (looking-at "::") t nil)))))
+
+(defun do-yas-expand ()
+  "Do a yasnipped expansion."
+  (let ((yas/fallback-behavior 'return-nil))
+    (yas/expand)))
+
+(defun tab-indent-or-complete ()
+  "Either indent or complete."
+  (interactive)
+  (if (minibufferp)
+      (minibuffer-complete)
+    (if (or (not yas/minor-mode)
+	    (null (do-yas-expand)))
+	    (if (check-expansion)
+		(company-complete-common)
+	      (indent-for-tab-command)))))
 #+end_src
 
 ** lsp-mode
 #+begin_src emacs-lisp :lexical t
-(use-package lsp
-  :init
-  (setq lsp-keymap-prefix "C-c l")
-  :hook ((rust-mode . lsp-deferred)
-	 (python-mode . lsp-deferred)
-	 (c-mode . lsp-deferred)
-	 (c++-mode . lsp-deferred))
-  :commands (lsp lsp-deferred))
-#+end_src
+(use-package lsp-mode
+  :commands lsp
+  :custom
+  ;; what to use when checking on-save. "check" is default, I prefer clippy
+  (lsp-rust-analyzer-cargo-watch-command "clippy")
+  (lsp-idle-delay 0.6)
+  ;; enable / disable the hints as you prefer:
+  (lsp-inlay-hint-enable t)
+  (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
+  (lsp-rust-analyzer-display-chaining-hints t)
+  (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil)
+  (lsp-rust-analyzer-display-closure-return-type-hints t)
+  (lsp-rust-analyzer-display-parameter-hints nil)
+  (lsp-rust-analyzer-display-reborrow-hints nil))
 
-** lsp-ui
-#+begin_src emacs-lisp :lexical t
 (use-package lsp-ui
   :commands lsp-ui-mode
-  :hook (lsp-mode . lsp-ui-mode)
-  :config
-  (setq lsp-ui-sideline-enable t)
-  (setq lsp-ui-sideline-show-hover nil)
-  (setq lsp-ui-doc-position 'bottom))
+  :custom
+  (lsp-ui-peek-always-show t)
+  (lsp-ui-doc-enable t)
+  (lsp-ui-doc-position 'top)
+  (lsp-ui-doc-side 'right)
+  (lsp-ui-doc-delay 0.7)
+  (lsp-ui-doc-show-with-cursor t)
+  (custom-set-faces '(markdown-code-face ((t (:inherit default))))))
+
+(with-eval-after-load 'lsp-mode
+  (defun lsp-booster--advice-json-parse (old-fn &rest args)
+    "Try to parse bytecode instead of json."
+    (or
+     (when (equal (following-char) ?#)
+       (let ((bytecode (read (current-buffer))))
+	 (when (byte-code-function-p bytecode)
+           (funcall bytecode))))
+     (apply old-fn args)))
+  (advice-add (if (progn (require 'json)
+			 (fboundp 'json-parse-buffer))
+                  'json-parse-buffer
+		'json-read)
+              :around
+              #'lsp-booster--advice-json-parse)
+  
+  (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
+    "Prepend emacs-lsp-booster command to lsp CMD."
+    (let ((orig-result (funcall old-fn cmd test?)))
+      (if (and (not test?)                             ;; for check lsp-server-present?
+               (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
+               lsp-use-plists
+               (not (functionp 'json-rpc-connection))  ;; native json-rpc
+               (executable-find "emacs-lsp-booster"))
+          (progn
+            (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
+              (setcar orig-result command-from-exec-path))
+            (message "Using emacs-lsp-booster for %s!" orig-result)
+            (cons "emacs-lsp-booster" orig-result))
+	orig-result)))
+  (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command))
 #+end_src
 
 ** lsp-pyright
@@ -336,6 +431,27 @@ https://github.com/progfolio/elpaca
   :hook (python-mode . (lambda () (require 'lsp-pyright))))
 #+end_src
 
+** yas-snippet
+#+begin_src emacs-lisp :lexical t
+(use-package yasnippet
+  :config
+  (yas-reload-all)
+  (setq yasnippets-dirs
+	'("~/.emacs.d/snippets"))
+  (yas-global-mode 1)
+  :bind (:map yas-keymap
+	      ("C-." . yas-next-field-or-maybe-expand)
+	      ("C-," . yas-prev-field))
+  :hook
+  '((prog-mode . yas-minor-mode)
+    (text-mode . yas-minor-mode)))
+#+end_src
+
+** zig
+#+begin_src emacs-lisp :lexical t
+(use-package reformatter)
+(use-package zig-mode)
+#+end_src
 
 ** flycheck
 #+begin_src emacs-lisp :lexical t
@@ -344,41 +460,39 @@ https://github.com/progfolio/elpaca
   :init (global-flycheck-mode))
 #+end_src
 
-** lsp-treemacs
-#+begin_src emacs-lisp :lexical t
-(use-package lsp-treemacs
-  :commands lsp-treemacs-errors-list)
-#+end_src
-
-** rust-mode
+** rust
 #+begin_src emacs-lisp :lexical t
 (use-package rust-mode
+  :hook
+  ((rust-mode . rustic-mode)
+   (rust-mode . lsp-deferred)))
+
+(defun my/rustic-mode-hook ()
+  "A hook for rustic-mode."
+  (when buffer-file-name
+    (setq-local buffer-save-without-query t))
+  (add-hook 'before-save-hook 'lsp-format-buffer nil t))
+
+(use-package rustic
+  :bind (:map rustic-mode-map
+	      ("M-j" . lsp-ui-menu)
+	      ("M-?" . lsp-find-references)
+	      ("C-c C-c l" . flycheck-list-errors)
+	      ("C-c C-c a" . lsp-execute-code-action)
+	      ("C-c C-c r" . lsp-rename)
+	      ("C-c C-c q" . lsp-workspace-restart)
+	      ("C-c C-c Q" . lsp-workspace-shutdown)
+	      ("C-c C-c s" . lsp-rust-analyzer-status))
   :config
-  (setq rust-mode-treesitter-derive t)
-  (setq rust-format-on-save t)
-  (prettify-symbols-mode))
+  (setq rustic-format-on-save t)
+  :hook
+  (rustic-mode . my/rustic-mode-hook))
 #+end_src
 
-** cargo
+** emacs-lisp
 #+begin_src emacs-lisp :lexical t
-(use-package cargo
-  :hook (rust-mode-hook . cargo-mode))
-#+end_src
-
-** siege-mode
-#+begin_src emacs-lisp :lexical t
-(use-package siege-mode
-  :ensure quelpa
-  :quelpa (siege-mode :repo "tslilc/siege-mode" :fetcher github)
-  :hook (prog-mode . siege-mode))
-#+end_src
-
-** python-mode
-#+begin_src emacs-lisp :lexical t
-(use-package python-mode)
-#+end_src
-
-** pipenv
-#+begin_src emacs-lisp :lexical t
-
+(use-package emac-lisp-mode
+  :ensure nil
+  :bind (:map emacs-lisp-mode-map
+	      ("C-S-b" . eval-buffer)))
 #+end_src
