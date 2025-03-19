@@ -175,7 +175,8 @@
   (interactive)
   (end-of-line)
   (open-line 1)
-  (forward-line 1))
+  (forward-line 1)
+  (indent-for-tab-command))
 
 (defun insert-line-above ()
   "Insert an empty line above the current line."
@@ -183,7 +184,8 @@
   (forward-line -1)
   (end-of-line)
   (open-line 1)
-  (forward-line 1))
+  (forward-line 1)
+  (indent-for-tab-command))
 
 (defun kill-other-buffers ()
   "Kill all other buffers."
