@@ -227,7 +227,8 @@
 ;; =============================================
 (use-package rust-mode
   :hook
-  rustic-mode)
+  ((rust-mode . rustic-mode)
+   (rust-mode . lsp-deferred)))
 
 (defun my/rustic-mode-hook ()
   "A hook for rustic-mode."
