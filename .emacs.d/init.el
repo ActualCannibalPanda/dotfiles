@@ -218,11 +218,10 @@
 ;; =============================================
 ;; elisp
 ;; =============================================
-(defun my/emacs-lisp-mode-hook ()
-  "My hook for elisp mode."
-  (define-key emacs-lisp-mode-map (kbd "C-S-b") 'eval-buffer))
-
-(add-hook 'emacs-lisp-mode-hook 'my/emacs-lisp-mode-hook)
+(use-package emac-lisp-mode
+  :ensure nil
+  :bind (:map emacs-lisp-mode-map
+	      ("C-S-b" . eval-buffer)))
 
 ;; =============================================
 ;; rust
