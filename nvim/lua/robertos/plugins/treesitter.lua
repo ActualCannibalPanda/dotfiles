@@ -20,7 +20,10 @@ return {
       },
       indent = { enable = true },
     })
-    require('nvim-treesitter.install').compilers = { 'clang', 'cl' }
+
+    if vim.loop.os_uname().sysname == "Windows_NT" then
+      require("nvim-treesitter.install").compilers = { "zig" }
+    end
     require('rainbow-delimiters.setup').setup({})
   end,
 }
