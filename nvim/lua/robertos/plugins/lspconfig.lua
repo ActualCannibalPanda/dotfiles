@@ -7,6 +7,5 @@ return {
     require('robertos.plugins.lsp.lua').setup(capabilities)
     require('robertos.plugins.lsp.python').setup(capabilities)
     require('robertos.plugins.lsp.zig').setup(capabilities)
-    vim.lsp.enable("rust-analyzer")
   end,
 }
