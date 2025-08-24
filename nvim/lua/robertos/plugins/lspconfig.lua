@@ -7,5 +7,7 @@ return {
     require('robertos.plugins.lsp.lua').setup(capabilities)
     require('robertos.plugins.lsp.python').setup(capabilities)
     require('robertos.plugins.lsp.zig').setup(capabilities)
+
+    vim.keymap.set('n', '<F2>', vim.lsp.buf.rename)
   end,
 }
