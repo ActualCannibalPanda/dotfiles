@@ -15,6 +15,8 @@ function init()
   if vim.g.neovide then
     o.guifont = 'FiraCode Nerd Font'
   end
+
+  vim.notify = require('notify')
 end
 
 return {
