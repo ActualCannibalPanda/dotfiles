@@ -1,16 +1,14 @@
 return {
   'hrsh7th/nvim-cmp',
   dependencies = {
-    { 'hrsh7th/cmp-nvim-lsp' },
-    { 'hrsh7th/cmp-buffer' },
-    { 'hrsh7th/cmp-path' },
-    { 'hrsh7th/cmp-git' },
-    { 'hrsh7th/cmp-cmdline' },
-    { 'hrsh7th/cmp-vsnip' },
-    { 'hrsh7th/vim-vsnip' },
+    'hrsh7th/cmp-nvim-lsp',
+    'hrsh7th/cmp-buffer',
+    'hrsh7th/cmp-path',
+    'hrsh7th/cmp-cmdline',
+    'hrsh7th/cmp-vsnip',
+    'hrsh7th/vim-vsnip',
   },
   config = function()
-    -- Set up nvim-cmp.
     local cmp = require('cmp')
 
     cmp.setup({
@@ -38,11 +36,11 @@ return {
       }),
       sources = cmp.config.sources({
         { name = 'path' },
-        { name = 'nvim_lsp',               keyword_length = 3 },
+        { name = 'nvim_lsp' },
         { namd = 'nvim_lsp_signature_help' },
-        { name = 'nvim_lua',               keyword_length = 2 },
-        { name = 'buffer',                 keyword_length = 2 },
-        { name = 'vsnip',                  keyword_length = 2 }, -- For vsnip users.
+        { name = 'nvim_lua' },
+        { name = 'buffer' },
+        { name = 'vsnip' }, -- For vsnip users.
         { name = 'calc' },
       }),
       formatting = {
@@ -59,17 +57,6 @@ return {
         end,
       },
     })
-
-    -- To use git you need to install the plugin petertriho/cmp-git and uncomment lines below
-    -- Set configuration for specific filetype.
-    cmp.setup.filetype('gitcommit', {
-      sources = cmp.config.sources({
-        { name = 'git' },
-      }, {
-        { name = 'buffer' },
-      }),
-    })
-    require('cmp_git').setup()
 
     -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
     cmp.setup.cmdline({ '/', '?' }, {
