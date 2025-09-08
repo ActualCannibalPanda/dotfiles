@@ -1,16 +1,16 @@
 return {
   'folke/which-key.nvim',
-  config = function()
-    local wk = require('which-key')
-    wk.add({
-      mode = { 'n', 'v' },
+  event = 'VeryLazy',
+  opts_extended = { 'spec' },
+  opts = {
+    spec = {
       {
-        '<leader>h',
-        group = 'Harpoon',
+        mode = { 'n', 'v' },
+        { '[', group = 'prev' },
+        { ']', group = 'next' },
       },
-    })
-    wk.setup()
-  end,
+    },
+  },
   keys = {
     {
       '<leader>?',
@@ -18,6 +18,12 @@ return {
         require('which-key').show({ global = false })
       end,
       desc = 'Buffer Local Keymaps (which-key)',
+    },
+    {
+      '<C-w><space>',
+      function()
+        require('which-key').show({ keys = '<C-w>', loop = true })
+      end,
     },
   },
 }
