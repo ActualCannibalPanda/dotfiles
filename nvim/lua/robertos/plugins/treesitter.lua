@@ -12,6 +12,7 @@ return {
         'toml',
         'zig',
         'odin',
+        'gdscript',
       },
       auto_install = true,
       highlight = {
@@ -21,8 +22,8 @@ return {
       indent = { enable = true },
     })
 
-    if vim.loop.os_uname().sysname == "Windows_NT" then
-      require("nvim-treesitter.install").compilers = { "zig" }
+    if vim.loop.os_uname().sysname == 'Windows_NT' then
+      require('nvim-treesitter.install').compilers = { 'zig' }
     end
     require('rainbow-delimiters.setup').setup({})
   end,
