@@ -17,6 +17,14 @@ return {
   config = function()
     local cmp = require('cmp')
     cmp.setup({
+      enabled = function()
+        local disabled = false
+        disabled = disabled or (vim.api.nvim_get_option_value('buftype', { buf = 0 }) == 'prompt')
+        disabled = disabled or (vim.fn.reg_recording() ~= '')
+        disabled = disabled or (vim.fn.reg_executing() ~= '')
+        disabled = disabled or require('cmp.config.context').in_treesitter_capture('comment')
+        return not disabled
+      end,
       snippet = {
         expand = function(args)
           vim.fn['vsnip#anonymous'](args.body)
@@ -58,9 +66,24 @@ return {
       }),
     })
 
+    local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+    cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
+
     local capabilities = require('cmp_nvim_lsp')
+    -- Lua
+    vim.lsp.config('lua_ls', {
+      settings = {
+        Lua = {
+          diagnostics = {
+            globals = { 'vim' },
+          },
+        },
+      },
+    })
     vim.lsp.enable('lua_ls', {
       capabilities = capabilities,
     })
+
+    vim.keymap.set('n', '<F2>', vim.lsp.buf.rename)
   end,
 }
