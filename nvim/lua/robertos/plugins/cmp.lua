@@ -44,7 +44,7 @@ return {
         ['<S-Tab>'] = cmp.mapping(function(fallback)
           if cmp.visible() then
             cmp.select_prev_item()
-          elseif vim.fn['vsnip#available'](-11) == 1 then
+          elseif vim.fn['vsnip#available'](-1) == 1 then
             feedkey('<Plug>(vsnip-jump-prev)', '')
           else
             fallback()
