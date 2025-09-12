@@ -3,9 +3,7 @@ return {
   keys = {
     {
       '<leader>n?',
-      function()
-        require('notify').history()
-      end,
+      '<cmd>Telescope notify<cr>',
       desc = 'Notfiy History',
     },
   },
