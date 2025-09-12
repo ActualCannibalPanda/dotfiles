@@ -11,8 +11,7 @@ return {
     'hrsh7th/cmp-path',
     'hrsh7th/cmp-cmdline',
     'hrsh7th/nvim-cmp',
-    'hrsh7th/cmp-vsnip',
-    'hrsh7th/vim-vsnip',
+    'saadparwaiz1/cmp_luasnip',
   },
   config = function()
     local cmp = require('cmp')
@@ -23,11 +22,18 @@ return {
         disabled = disabled or (vim.fn.reg_recording() ~= '')
         disabled = disabled or (vim.fn.reg_executing() ~= '')
         disabled = disabled or require('cmp.config.context').in_treesitter_capture('comment')
+        disabled = disabled or require('cmp.config.context').in_treesitter_capture('string')
         return not disabled
       end,
       snippet = {
         expand = function(args)
-          vim.fn['vsnip#anonymous'](args.body)
+          local indent_nodes = true
+          if vim.api.nvim_get_option_value('filetype', { buf = 0 }) == 'dart' then
+            indent_nodes = false
+          end
+          require('luasnip').lsp_expand(args.body, {
+            indent = indent_nodes,
+          })
         end,
       },
       window = {
@@ -43,25 +49,31 @@ return {
         ['<Tab>'] = cmp.mapping(function(fallback)
           if cmp.visible() then
             cmp.select_next_item()
-          elseif vim.fn['vsnip#available'](1) == 1 then
-            feedkey('<Plug>(vsnip-expand-or-jump)', '')
           else
-            fallback()
+            local ls = require('luasnip')
+            if ls.locally_jumpable(1) then
+              ls.jump(1)
+            else
+              fallback()
+            end
           end
         end, { 'i', 's' }),
         ['<S-Tab>'] = cmp.mapping(function(fallback)
           if cmp.visible() then
             cmp.select_prev_item()
-          elseif vim.fn['vsnip#available'](-1) == 1 then
-            feedkey('<Plug>(vsnip-jump-prev)', '')
           else
-            fallback()
+            local ls = require('luasnip')
+            if ls.locally_jumpable(-1) then
+              ls.jump(-1)
+            else
+              fallback()
+            end
           end
         end, { 'i', 's' }),
       }),
       sources = cmp.config.sources({
         { name = 'nvim_lsp' },
-        { name = 'vsnip' },
+        { name = 'luasnip' },
         { name = 'buffer' },
       }),
     })
