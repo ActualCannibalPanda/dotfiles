@@ -10,7 +10,7 @@ return {
   },
   keys = {
     {
-      '<leader>o',
+      '<leader>oo',
       function()
         require('oil').toggle_float()
       end,
