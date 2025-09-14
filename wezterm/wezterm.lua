@@ -1,8 +1,9 @@
 local wezterm = require('wezterm')
 
-local config = {} 
+local config = {}
 
-config.color_scheme = "AdventureTime"
+config.font = wezterm.font('Fira Code')
+config.color_scheme = 'AdventureTime'
 config.window_background_opacity = 0.9
 
 return config
