@@ -12,6 +12,7 @@ return {
     'hrsh7th/cmp-cmdline',
     'hrsh7th/nvim-cmp',
     'saadparwaiz1/cmp_luasnip',
+    'p00f/clangd_extensions.nvim',
   },
   config = function()
     local cmp = require('cmp')
@@ -95,6 +96,21 @@ return {
     vim.lsp.enable('lua_ls', {
       capabilities = capabilities,
     })
+    vim.lsp.config('clangd', {
+      root_markers = {
+        '.clang-format',
+      },
+      cmd = {
+        'clangd',
+        '--background-index',
+        '--clang-tidy',
+        '--header-insertion=iwyu',
+        '--completion-style=detailed',
+        '--function-arg-placeholders',
+        '--fallback-style=llvm',
+      },
+    })
+    vim.lsp.enable('clangd')
 
     vim.keymap.set('n', '<F2>', vim.lsp.buf.rename)
   end,

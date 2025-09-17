@@ -136,3 +136,5 @@ flycheck_*.el
 pop-shell
 pop-system-updater
 touchegg
+DmitriySalnikov
+clangd
