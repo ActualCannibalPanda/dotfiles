@@ -1,7 +1,7 @@
 return {
   'rcarriga/nvim-notify',
   opts = {
-    background_color = '#4444BB',
+    background_colour = '#000000',
   },
   keys = {
     {
