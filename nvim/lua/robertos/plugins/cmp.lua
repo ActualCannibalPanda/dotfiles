@@ -1,7 +1,3 @@
-local feedkey = function(key, mode)
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes(key, true, true, true), mode, true)
-end
-
 return {
   'hrsh7th/nvim-cmp',
   dependencies = {
@@ -113,5 +109,6 @@ return {
     vim.lsp.enable('clangd')
 
     vim.keymap.set('n', '<F2>', vim.lsp.buf.rename)
+    vim.keymap.set('n', 'K', vim.lsp.buf.hover)
   end,
 }
