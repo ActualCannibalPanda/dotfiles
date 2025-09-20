@@ -107,6 +107,8 @@ return {
       },
     })
     vim.lsp.enable('clangd')
+    vim.lsp.enable('cmake')
+    vim.lsp.enable('glsl_analyzer')
 
     vim.keymap.set('n', '<F2>', vim.lsp.buf.rename)
     vim.keymap.set('n', 'K', vim.lsp.buf.hover)

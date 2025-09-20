@@ -19,6 +19,8 @@ return {
       python = { 'isort', 'black' },
       javascript = { 'prettierd', 'prettier', stop_after_first = true },
       rust = { 'rust_analyzer' },
+      cpp = { 'clang-format' },
+      cmake = { 'cmakelang' },
     },
     default_format_opts = {
       lsp_format = 'fallback',
