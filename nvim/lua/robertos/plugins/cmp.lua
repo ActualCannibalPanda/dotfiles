@@ -106,9 +106,11 @@ return {
         '--fallback-style=llvm',
       },
     })
-    vim.lsp.enable('clangd')
-    vim.lsp.enable('cmake')
-    vim.lsp.enable('glsl_analyzer')
+    vim.lsp.enable('clangd', { capabilities = capabilities })
+    vim.lsp.enable('cmake', { capabilities = capabilities })
+    vim.lsp.enable('glsl_analyzer', { capabilities = capabilities })
+    vim.lsp.enable('rust-analyzer', { capabilities = capabilities })
+    vim.lsp.enable('wgsl_analyzer', { capabilities = capabilities })
 
     vim.keymap.set('n', '<F2>', vim.lsp.buf.rename)
     vim.keymap.set('n', 'K', vim.lsp.buf.hover)

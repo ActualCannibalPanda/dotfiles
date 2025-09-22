@@ -16,6 +16,9 @@ function init()
     o.guifont = 'FiraCode Nerd Font'
   end
 
+  vim.wo.foldmethod = 'expr'
+  vim.wo.foldexpr = 'nvim_treesittrer#foldexpr'
+
   vim.notify = require('notify')
 end
 

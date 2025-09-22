@@ -9,11 +9,11 @@ s('n', 'K', function()
 end, { silent = true, buffer = bufnr })
 
 s('n', '<leader>rr', function()
-  vim.cmd.RustLsp { 'runnables', bang = true }
+  vim.cmd.RustLsp({ 'runnables', bang = true })
 end, { buffer = bufnr, desc = 'Run Rust Project' })
 
 s('n', '<leader>rd', function()
-  vim.cmd.RustLsp { 'debuggables', bang = true }
+  vim.cmd.RustLsp({ 'debuggables', bang = true })
 end, { buffer = bufnr, desc = 'Debug Rust Project' })
 
 s('n', '<leader>re', function()
