@@ -17,7 +17,8 @@ function init()
   end
 
   vim.wo.foldmethod = 'expr'
-  vim.wo.foldexpr = 'nvim_treesittrer#foldexpr'
+  vim.wo.foldexpr = 'v:lua.vim.tressitter.foldexpr()'
+  vim.o.foldlevelstart = 99
 
   vim.notify = require('notify')
 end
