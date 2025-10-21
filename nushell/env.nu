@@ -17,3 +17,13 @@
 # You can remove these comments if you want or leave
 # them for future reference.
 
+# Set Environment variables
+$env.CARGO_HOME = $env.HOME | path join ".cargo"
+
+use std/util "path add"
+path add ($env.CARGO_HOME | path join "bin")
+path add "/opt/nvim/bin/"
+path add "~/.local/bin"
+path add "/opt/nvim/bin"
+path add "/usr/local/go/bin"
+path add ($env.HOME | path join "go/bin")
