@@ -1,6 +1,8 @@
 function init()
   local o = vim.opt
 
+  o.whichwrap = 'hl'
+
   -- line numbers
   o.signcolumn = 'auto:2'
   o.foldcolumn = 'auto:1'
