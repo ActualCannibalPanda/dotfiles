@@ -89,32 +89,25 @@ return {
         },
       },
     })
-    vim.lsp.enable('lua_ls', {
-      capabilities = capabilities,
-    })
     vim.lsp.config('clangd', {
+      cmd = { 'clangd' },
+      filetypes = { 'c', 'cpp' },
       root_markers = {
         '.clang-format',
       },
-      cmd = {
-        'clangd',
-        '--background-index',
-        '--clang-tidy',
-        '--header-insertion=iwyu',
-        '--completion-style=detailed',
-        '--function-arg-placeholders',
-        '--fallback-style=llvm',
-      },
     })
-    vim.lsp.enable('pyright', { capabilities = capabilities })
-    vim.lsp.enable('clangd', { capabilities = capabilities })
-    vim.lsp.enable('cmake', { capabilities = capabilities })
-    vim.lsp.enable('glsl_analyzer', { capabilities = capabilities })
-    vim.lsp.enable('rust-analyzer', { capabilities = capabilities })
-    vim.lsp.enable('wgsl_analyzer', { capabilities = capabilities })
+    vim.lsp.enable({
+      'lua_ls',
+      'pyright',
+      'clangd',
+      'cmake',
+      'glsl_analyzer',
+      'rust-analyzer',
+      'wgsl_analyzer',
+    })
 
     vim.keymap.set('n', '<F2>', vim.lsp.buf.rename)
     vim.keymap.set('n', 'K', vim.lsp.buf.hover)
-    vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action)
+    -- vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action)
   end,
 }
