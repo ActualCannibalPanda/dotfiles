@@ -106,6 +106,7 @@ return {
         '--fallback-style=llvm',
       },
     })
+    vim.lsp.enable('pyright', { capabilities = capabilities })
     vim.lsp.enable('clangd', { capabilities = capabilities })
     vim.lsp.enable('cmake', { capabilities = capabilities })
     vim.lsp.enable('glsl_analyzer', { capabilities = capabilities })
