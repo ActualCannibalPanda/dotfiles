@@ -34,9 +34,9 @@ zinit snippet OMZP::git
 zinit snippet OMZP::sudo
 zinit snippet OMZP::archlinux
 
-# Load completions
-autoload -U compinit
-compinit
+# Load Modules
+autoload -U compinit && compinit
+autoload -U colors && colors
 
 zinit cdreplay -q
 
@@ -118,4 +118,4 @@ function auto_venv() {
 add-zsh-hook chpwd auto_venv
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+[[ -f "$ZDOTDIR/.p10k.zsh" ]] && source "$ZDOTDIR/.p10k.zsh"
