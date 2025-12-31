@@ -17,8 +17,9 @@ fi
 # Start zinit
 source "${ZINIT_HOME}/zinit.zsh"
 
-# Linux Variables
-export EDITOR=/usr/bin/nvim
+# Create XDG Dirs
+[ -d "$XDG_CACHE_HOME/zsh" ] || mkdir -p "$XDG_CACHE_HOME/zsh"
+[ -d "$XDG_DATA_HOME/zsh" ] || mkdir -p "$XDG_DATA_HOME/zsh"
 
 # Install Powerlevel10k``
 zinit ice depth=1; zinit light romkatv/powerlevel10k
@@ -35,7 +36,8 @@ zinit snippet OMZP::sudo
 zinit snippet OMZP::archlinux
 
 # Load Modules
-autoload -U compinit && compinit
+autoload -U compinit
+compinit -d "$XDG_CACHE_HOME/zsh/zcompdump-$ZSH_VERSION"
 autoload -U colors && colors
 
 zinit cdreplay -q
@@ -47,8 +49,8 @@ bindkey '^n' history-search-forward
 bindkey ' ' magic-space
 
 # History
-HISTSIZE=5000
-HISTFILE=~/.zsh_history
+HISTSIZE=10000
+HISTFILE="$XDG_DATA_HOME/zsh/history"
 SAVEHIST=$HISTSIZE
 HISTDUP=erase
 setopt appendhistory
@@ -60,6 +62,7 @@ setopt hist_ignore_dups
 setopt hist_find_no_dups
 
 # Completion styling
+zstyle ':completion:*' cache-path "$XDG_CACHE_HOME/zsh/zcompcache"
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' menu no
@@ -67,6 +70,7 @@ zstyle ":fzf-tab:complete:cd:*" fzf-preview 'ls --color $realpath'
 
 # Aliases
 alias ls='ls --color'
+alias la='ls --color -a'
 
 # Alias suffixes
 alias -s py="$EDITOR"
@@ -116,6 +120,8 @@ function auto_venv() {
 }
 
 add-zsh-hook chpwd auto_venv
+
+. "$CARGO_HOME/env"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ -f "$ZDOTDIR/.p10k.zsh" ]] && source "$ZDOTDIR/.p10k.zsh"
