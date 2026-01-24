@@ -1,95 +1,74 @@
 return {
   'ThePrimeagen/harpoon',
-  dependencies = { 'nvim-lua/plenary.nvim' },
-  opts = {},
-  keys = {
-    {
-      '<leader>hf',
-      function()
-        require('harpoon.mark').add_file()
-      end,
-      desc = 'Add file to harpoon',
-    },
-    {
-      '<leader>hh',
-      function()
-        require('harpoon.ui').toggle_quick_menu()
-      end,
-      desc = 'Open Harpoon quick menu',
-    },
-    {
-      '<leader>hj',
-      function()
-        require('harpoon.ui').nav_next()
-      end,
-      desc = 'Nav to next file in Harpoon',
-    },
-    {
-      '<leader>hk',
-      function()
-        require('harpoon.ui').nav_prev()
-      end,
-      desc = 'Nav to previous file in Harpoon',
-    },
-    {
-      '<leader>1',
-      function()
-        require('harpoon.ui').nav_file(1)
-      end,
-    },
-    {
-      '<leader>2',
-      function()
-        require('harpoon.ui').nav_file(1)
-      end,
-    },
-    {
-      '<leader>3',
-      function()
-        require('harpoon.ui').nav_file(3)
-      end,
-    },
-    {
-      '<leader>4',
-      function()
-        require('harpoon.ui').nav_file(4)
-      end,
-    },
-    {
-      '<leader>5',
-      function()
-        require('harpoon.ui').nav_file(5)
-      end,
-    },
-    {
-      '<leader>6',
-      function()
-        require('harpoon.ui').nav_file(6)
-      end,
-    },
-    {
-      '<leader>7',
-      function()
-        require('harpoon.ui').nav_file(7)
-      end,
-    },
-    {
-      '<leader>8',
-      function()
-        require('harpoon.ui').nav_file(8)
-      end,
-    },
-    {
-      '<leader>9',
-      function()
-        require('harpoon.ui').nav_file(9)
-      end,
-    },
-    {
-      '<leader>0',
-      function()
-        require('harpoon.ui').nav_file(10)
-      end,
-    },
+  dependencies = {
+    'nvim-lua/plenary.nvim',
+    'nvim-telescope/telescope.nvim',
   },
+  branch = 'harpoon2',
+  config = function()
+    local harpoon = require('harpoon')
+
+    harpoon:setup()
+
+    local conf = require('telescope.config').values
+    local function toggle_telescope(harpoon_files)
+      local file_paths = {}
+      for _, item in ipairs(harpoon_files) do
+        table.insert(file_paths)
+      end
+
+      require('telescope.pickers')
+        .new({}, {
+          prompt_title = 'Harpoon',
+          finder = require('telescope.finders').new_table({
+            results = file_paths,
+          }),
+          previewer = conf.file_previewer({}),
+          sorter = conf.generic_sorter({}),
+        })
+        :find()
+    end
+
+    local s = vim.keymap.set
+
+    s('n', '<leader>hf', function()
+      harpoon:list():add()
+    end, { desc = 'Add file to harpoon' })
+    s('n', '<leader>hh', function()
+      toggle_telescope(harpoon:list())
+    end, { desc = 'Toggle harpoon quick-menu' })
+    s('n', '<leader>hj', function()
+      harpoon:list():next()
+    end, { desc = 'Next file in harpoon list' })
+    s('n', '<leader>hk', function()
+      harpoon:list():prev()
+    end, { desc = 'Next file in harpoon list' })
+    s('n', '<leader>1', function()
+      harpoon:list():select(1)
+    end, { desc = 'Next file in harpoon list' })
+    s('n', '<leader>2', function()
+      harpoon:list():select(2)
+    end, { desc = 'Next file in harpoon list' })
+    s('n', '<leader>3', function()
+      harpoon:list():select(3)
+    end, { desc = 'Next file in harpoon list' })
+    s('n', '<leader>4', function()
+      harpoon:list():select(4)
+    end, { desc = 'Next file in harpoon list' })
+    s('n', '<leader>5', function()
+      harpoon:list():select(5)
+    end, { desc = 'Next file in harpoon list' })
+    s('n', '<leader>6', function()
+      harpoon:list():select(6)
+    end, { desc = 'Next file in harpoon list' })
+    s('n', '<leader>7', function()
+      harpoon:list():select(7)
+    end, { desc = 'Next file in harpoon list' })
+    s('n', '<leader>8', function()
+      harpoon:list():select(8)
+    end, { desc = 'Next file in harpoon list' })
+    s('n', '<leader>9', function()
+      harpoon:list():select(9)
+    end, { desc = 'Next file in harpoon list' })
+  end,
 }
