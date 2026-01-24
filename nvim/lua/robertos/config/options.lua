@@ -21,8 +21,6 @@ function init()
   vim.wo.foldmethod = 'expr'
   vim.wo.foldexpr = 'v:lua.vim.tressitter.foldexpr()'
   vim.o.foldlevelstart = 99
-
-  vim.notify = require('notify')
 end
 
 return {
