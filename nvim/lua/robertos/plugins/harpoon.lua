@@ -18,23 +18,77 @@ return {
       desc = 'Open Harpoon quick menu',
     },
     {
-      '<leader>hn',
+      '<leader>hj',
       function()
         require('harpoon.ui').nav_next()
       end,
       desc = 'Nav to next file in Harpoon',
     },
     {
-      '<leader>hp',
+      '<leader>hk',
       function()
         require('harpoon.ui').nav_prev()
       end,
       desc = 'Nav to previous file in Harpoon',
     },
     {
-      '<leader>hc',
+      '<leader>1',
       function()
-        require('harpoon.ui').nav_file(vim.v.count)
+        require('harpoon.ui').nav_file(1)
+      end,
+    },
+    {
+      '<leader>2',
+      function()
+        require('harpoon.ui').nav_file(1)
+      end,
+    },
+    {
+      '<leader>3',
+      function()
+        require('harpoon.ui').nav_file(3)
+      end,
+    },
+    {
+      '<leader>4',
+      function()
+        require('harpoon.ui').nav_file(4)
+      end,
+    },
+    {
+      '<leader>5',
+      function()
+        require('harpoon.ui').nav_file(5)
+      end,
+    },
+    {
+      '<leader>6',
+      function()
+        require('harpoon.ui').nav_file(6)
+      end,
+    },
+    {
+      '<leader>7',
+      function()
+        require('harpoon.ui').nav_file(7)
+      end,
+    },
+    {
+      '<leader>8',
+      function()
+        require('harpoon.ui').nav_file(8)
+      end,
+    },
+    {
+      '<leader>9',
+      function()
+        require('harpoon.ui').nav_file(9)
+      end,
+    },
+    {
+      '<leader>0',
+      function()
+        require('harpoon.ui').nav_file(10)
       end,
     },
   },
