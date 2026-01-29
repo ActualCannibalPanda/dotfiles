@@ -103,7 +103,6 @@ return {
       'clangd',
       'cmake',
       'glsl_analyzer',
-      'rust-analyzer',
       'wgsl_analyzer',
     })
 
