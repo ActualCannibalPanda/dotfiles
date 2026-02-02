@@ -123,7 +123,8 @@ add-zsh-hook chpwd auto_venv
 
 . "$CARGO_HOME/env"
 
-export PATH="$PATH:$HOME/.local/bin"
+export GOPATH="/opt/go/bin"
+export PATH="$PATH:$GOPATH:$HOME/.local/bin"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ -f "$ZDOTDIR/.p10k.zsh" ]] && source "$ZDOTDIR/.p10k.zsh"

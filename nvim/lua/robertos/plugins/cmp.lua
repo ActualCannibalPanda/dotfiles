@@ -97,6 +97,10 @@ return {
         '.clang-format',
       },
     })
+    vim.lsp.config('gopls', {
+      filetypes = { 'go' },
+      root_markers = { 'go.mod' },
+    })
     vim.lsp.enable({
       'lua_ls',
       'pyright',
@@ -104,6 +108,7 @@ return {
       'cmake',
       'glsl_analyzer',
       'wgsl_analyzer',
+      'gopls',
     })
 
     vim.keymap.set('n', '<F2>', vim.lsp.buf.rename)

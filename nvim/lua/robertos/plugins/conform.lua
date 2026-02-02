@@ -21,6 +21,7 @@ return {
       rust = { 'rustfmt' },
       cpp = { 'clang-format' },
       cmake = { 'cmakelang' },
+      go = { 'goimports', 'gofmt' },
     },
     default_format_opts = {
       lsp_format = 'fallback',
